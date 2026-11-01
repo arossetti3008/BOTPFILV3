@@ -106,6 +106,8 @@ Generadas con `node scripts/probar-tutor.js`, con `gemini-3.5-flash-lite`. El co
 |---|---|---|---|
 | Pantallas Inicio, Análisis, Cierre y Consigna; encabezado con cambio de tema | Sí | Navegador real + capturas revisadas | Exportación y consentimiento en Cierre (Etapa 5) |
 | Recorrido Inicio → Análisis con clics reales: datos del grupo bloqueados hasta aceptar el aviso; al aceptar, la vista baja al formulario; "Empezar" lleva a Análisis | Sí | Navegador real (clics de mouse simulados). Se agregó porque el usuario no encontró cómo seguir después de aceptar | — |
+| Volver y retomar: enlace "Cambiar de grupo o corpus" en Análisis; recuadro "Tienen una conversación en curso" arriba del inicio; cerrar la pestaña y abrir otra conserva la conversación; el botón "atrás" vuelve al inicio; cada pantalla empieza desde arriba | Sí | Navegador real a 390 px: se cerró la pestaña, se abrió otra y "Volver a la conversación" recuperó los 2 mensajes | — |
+| El chat se desplaza solo dentro de su cuadro (antes movía toda la página hacia abajo al entrar a Análisis) | Sí | Navegador real: la página queda arriba y el chat muestra el último mensaje | — |
 | Diseño revisado por el usuario: letra Nunito y Fraunces "suave", más espaciado, opciones de comisión grandes, párrafos justificados desde 600 px (a la izquierda en celular) y presentación centrada | Sí | Capturas a 360 y 1280 px | — |
 | Sin scroll horizontal a 360, 768 y 1280 px | Sí | Navegador real: `scrollWidth` ≤ `clientWidth` en Inicio, Análisis, Cierre (los 3 anchos) y Consigna (768 px) | Dispositivos físicos (celulares y tablets del aula) |
 | Una columna en celular, dos columnas (corpus + chat) desde 900 px | Sí | Capturas a 360 y 1280 px | — |

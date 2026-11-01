@@ -64,12 +64,15 @@ function Mensaje({ mensaje }) {
 }
 
 export default function Chat({ mensajes, enviando, maxCaracteres, bloqueado, onEnviar, texto, onCambiarTexto }) {
-  const finRef = useRef(null);
+  const historialRef = useRef(null);
   const largo = texto.length;
   const excedido = largo > maxCaracteres;
 
+  // Lleva al último mensaje desplazando solo el cuadro del chat (no la
+  // página: en celular haría saltar la pantalla por encima del corpus)
   useEffect(() => {
-    finRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    const historial = historialRef.current;
+    if (historial) historial.scrollTo({ top: historial.scrollHeight, behavior: 'smooth' });
   }, [mensajes.length, enviando]);
 
   function manejarEnvio(e) {
@@ -85,7 +88,13 @@ export default function Chat({ mensajes, enviando, maxCaracteres, bloqueado, onE
 
   return (
     <div className="chat">
-      <div className="chat-historial" role="log" aria-live="polite" aria-label="Conversación con el asistente">
+      <div
+        ref={historialRef}
+        className="chat-historial"
+        role="log"
+        aria-live="polite"
+        aria-label="Conversación con el asistente"
+      >
         {mensajes.length === 0 && (
           <p className="chat-vacio">
             Empiecen contando qué observan en las imágenes y qué interpretan. El asistente va a guiarlos con preguntas.
@@ -95,7 +104,6 @@ export default function Chat({ mensajes, enviando, maxCaracteres, bloqueado, onE
           <Mensaje key={m.id} mensaje={m} />
         ))}
         {enviando && <p className="chat-pensando">El asistente está pensando…</p>}
-        <div ref={finRef} />
       </div>
 
       <form className="chat-formulario" onSubmit={manejarEnvio}>

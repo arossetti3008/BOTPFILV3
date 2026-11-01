@@ -1,4 +1,5 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import Encabezado from './components/Encabezado';
 import Inicio from './pages/Inicio';
 import Analisis from './pages/Analisis';
@@ -6,6 +7,14 @@ import Cierre from './pages/Cierre';
 import Consigna from './pages/Consigna';
 
 export default function App() {
+  const { pathname } = useLocation();
+
+  // Cada pantalla empieza desde arriba (si no, se conserva el desplazamiento
+  // de la pantalla anterior y lo importante queda fuera de la vista)
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
   return (
     <>
       <a href="#contenido" className="saltar">

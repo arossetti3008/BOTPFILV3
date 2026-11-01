@@ -55,7 +55,10 @@ function AreaAnalisis({ sesion, corpus, limites }) {
       <section className="analisis-chat tarjeta" aria-label="Trabajo con el asistente">
         <div className="analisis-cabecera">
           <p className="texto-suave">
-            Grupo <strong>{sesion.grupo}</strong>
+            Grupo <strong>{sesion.grupo}</strong> ·{' '}
+            <Link to="/" className="enlace-suave">
+              ← Cambiar de grupo o corpus
+            </Link>
           </p>
           <p className={`guardado ${guardado ? '' : 'guardado-no'}`} role="status">
             {guardado

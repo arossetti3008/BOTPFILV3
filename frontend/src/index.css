@@ -327,6 +327,10 @@ a:focus-visible {
 .aviso-lista li { margin-bottom: 14px; padding-left: 4px; }
 .formulario-inicio h2 { margin-bottom: 20px; }
 .formulario-inicio { scroll-margin-top: 16px; }
+.en-curso { border-color: var(--acento); }
+.en-curso .boton-primario { margin: 8px 0 4px; }
+.enlace-suave { color: var(--texto-suave); font-size: 0.9rem; }
+.enlace-suave:hover { color: var(--acento); }
 .sin-borde { border: none; padding: 0; margin: 0; min-width: 0; }
 .formulario-bloqueado .sin-borde { opacity: 0.55; }
 .formulario-bloqueado .aviso-suave { margin-bottom: 20px; }

@@ -55,6 +55,10 @@ export default function Inicio() {
 
   if (!config) return <EstadoServidor estado={estadoConfig} onReintentar={cargarConfig} />;
 
+  // Conversación en curso en este dispositivo (la última sesión usada)
+  const enCurso = sesion ? leerConversacion(sesion) : null;
+  const hayEnCurso = Boolean(enCurso?.mensajes.length);
+
   const comisionElegida = config.comisiones.find((c) => c.id === comision);
   const patron = new RegExp(config.formatoGrupo.patron);
   const ejemplos = config.formatoGrupo.ejemplos.join(' o ');
@@ -116,6 +120,21 @@ export default function Inicio() {
 
   return (
     <div className="inicio">
+      {hayEnCurso && (
+        <section className="tarjeta en-curso" aria-labelledby="en-curso-titulo">
+          <h2 id="en-curso-titulo">Tienen una conversación en curso</h2>
+          <p>
+            Grupo <strong>{sesion.grupo}</strong>
+            {enCurso.corpusTitulo && <> · {enCurso.corpusTitulo}</>} · {enCurso.mensajes.length} mensajes, guardados en
+            este dispositivo.
+          </p>
+          <button type="button" className="boton-primario" onClick={() => navigate('/analisis')}>
+            Volver a la conversación
+          </button>
+          <p className="ayuda">Si son otro grupo o quieren otro corpus, completen los datos de abajo.</p>
+        </section>
+      )}
+
       <section className="presentacion">
         <span className="eyebrow">Lenguaje Visual III · IFDC Villa Mercedes</span>
         <h1>Análisis discursivo de imágenes</h1>
