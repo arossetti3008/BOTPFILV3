@@ -136,6 +136,18 @@ test('clave inválida (403): error claro y sin respaldo', async () => {
   assert.equal(llamadas.length, 1);
 });
 
+test('clave mal copiada (400 "API key not valid"): error claro', async () => {
+  const { gemini } = servicio({
+    respuestas: () => h.errorGemini(400, { error: { code: 400, status: 'INVALID_ARGUMENT', message: 'API key not valid. Please pass a valid API key.' } }),
+  });
+  await assert.rejects(gemini.generar(PEDIDO), (e) => e.statusCode === 502 && /clave de Gemini/.test(e.message));
+});
+
+test('otro 400 de Google: error de configuración comprensible', async () => {
+  const { gemini } = servicio({ respuestas: () => h.errorGemini(400, { error: { message: 'Invalid value at generation_config' } }) });
+  await assert.rejects(gemini.generar(PEDIDO), (e) => e.statusCode === 502 && /configuración del asistente/.test(e.message));
+});
+
 test('pedido bloqueado (promptFeedback.blockReason) → 422', async () => {
   const { gemini } = servicio({
     respuestas: () => new Response(JSON.stringify({ promptFeedback: { blockReason: 'SAFETY' } }), { status: 200 }),

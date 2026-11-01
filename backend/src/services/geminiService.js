@@ -193,8 +193,15 @@ function crearServicioGemini({ config, cuota, fetchImpl, esperar }) {
           probarRespaldo: true,
         });
       }
-      if (estado === 401 || estado === 403) {
+      // Google responde 400 "API key not valid" cuando la clave está mal copiada
+      if (estado === 401 || estado === 403 || (estado === 400 && /API[_ ]?key/i.test(detalle))) {
         throw crearError('La clave de Gemini no es válida o no tiene permisos. Avisale al docente.', 502);
+      }
+      if (estado === 400) {
+        throw crearError(
+          'Google rechazó el pedido por un problema de configuración del asistente (revisar el modelo y las variables GEMINI_*). Avisale al docente.',
+          502
+        );
       }
       throw crearError('El servicio del asistente no está disponible en este momento. Intenten de nuevo.', 502);
     }
