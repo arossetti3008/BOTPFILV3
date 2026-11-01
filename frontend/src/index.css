@@ -381,8 +381,9 @@ a:focus-visible {
 }
 .corpus-miniatura img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
 .corpus-numero { display: block; padding: 6px 10px; font-size: 0.8rem; font-weight: 600; }
-.ficha { font-size: 0.85rem; margin-top: 6px; }
-.ficha p { margin: 0 0 2px; }
+.ficha { font-size: 0.85rem; margin-top: 8px; line-height: 1.45; }
+/* En columnas angostas el justificado deja huecos: las fichas van a la izquierda */
+.ficha p { margin: 0 0 4px; text-align: left; hyphens: manual; }
 .ficha-titulo { font-weight: 600; }
 .ficha-procedencia { color: var(--texto-suave); }
 

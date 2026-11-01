@@ -74,6 +74,8 @@ function versionPublica(corpus) {
       anio: imagen.anio || '',
       soporte: imagen.soporte || '',
       procedencia: imagen.procedencia || '',
+      // Dirección web de la ficha de la obra (solo si es http/https)
+      fuente: /^https?:\/\//.test(imagen.fuente || '') ? imagen.fuente : '',
       textoAlternativo: imagen.textoAlternativo,
     })),
   };

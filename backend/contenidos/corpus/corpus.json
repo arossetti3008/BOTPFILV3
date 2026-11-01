@@ -12,8 +12,9 @@
         "autor": "Cindy Sherman",
         "anio": "1978",
         "soporte": "Fotografía en blanco y negro, copia en gelatina de plata",
-        "procedencia": "Museum of Modern Art (MoMA), Nueva York. https://www.moma.org/collection/works/56618/",
-        "textoAlternativo": "Fotografía en blanco y negro de una mujer con vestimenta formal, situada en un espacio urbano, con edificios de varios pisos al fondo."
+        "procedencia": "Museum of Modern Art (MoMA), Nueva York",
+        "textoAlternativo": "Fotografía en blanco y negro de una mujer con vestimenta formal, situada en un espacio urbano, con edificios de varios pisos al fondo.",
+        "fuente": "https://www.moma.org/collection/works/56618/"
       },
       {
         "id": "img2",
@@ -22,8 +23,9 @@
         "autor": "Barbara Kruger",
         "anio": "1989",
         "soporte": "Serigrafía fotográfica sobre vinilo; imagen gráfica vinculada a la intervención política",
-        "procedencia": "The Broad, Los Ángeles. https://www.thebroad.org/art/barbara-kruger/untitled-your-body-battleground",
-        "textoAlternativo": "Representación frontal de un rostro femenino dividido en dos mitades con tratamientos tonales opuestos. Presenta textos en blanco sobre bandas rojas."
+        "procedencia": "The Broad, Los Ángeles",
+        "textoAlternativo": "Representación frontal de un rostro femenino dividido en dos mitades con tratamientos tonales opuestos. Presenta textos en blanco sobre bandas rojas.",
+        "fuente": "https://www.thebroad.org/art/barbara-kruger/untitled-your-body-battleground"
       },
       {
         "id": "img3",
@@ -32,8 +34,9 @@
         "autor": "Guerrilla Girls",
         "anio": "1989",
         "soporte": "Afiche, litografía offset",
-        "procedencia": "The Metropolitan Museum of Art, Nueva York. https://www.metmuseum.org/art/collection/search/849438",
-        "textoAlternativo": "Afiche horizontal con fondo amarillo, texto negro de gran tamaño y una figura femenina desnuda y reclinada con máscara de gorila."
+        "procedencia": "The Metropolitan Museum of Art, Nueva York",
+        "textoAlternativo": "Afiche horizontal con fondo amarillo, texto negro de gran tamaño y una figura femenina desnuda y reclinada con máscara de gorila.",
+        "fuente": "https://www.metmuseum.org/art/collection/search/849438"
       }
     ]
   }

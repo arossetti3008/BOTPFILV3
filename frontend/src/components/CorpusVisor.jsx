@@ -11,6 +11,13 @@ function Ficha({ imagen }) {
       {datos && <p>{datos}</p>}
       {imagen.soporte && <p>Soporte: {imagen.soporte}</p>}
       {imagen.procedencia && <p className="ficha-procedencia">Procedencia: {imagen.procedencia}</p>}
+      {imagen.fuente && (
+        <p className="ficha-procedencia">
+          <a href={imagen.fuente} target="_blank" rel="noopener noreferrer">
+            Ver ficha en el museo<span className="sr-only"> (se abre en otra pestaña)</span> ↗
+          </a>
+        </p>
+      )}
     </div>
   );
 }
