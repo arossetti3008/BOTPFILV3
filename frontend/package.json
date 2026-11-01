@@ -1,5 +1,5 @@
 {
-  "name": "frontend",
+  "name": "botpfilv3-frontend",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node --test src/utils/*.test.js"
   },
   "dependencies": {
     "react": "^19.3.1",

@@ -96,6 +96,34 @@ Generadas con `node scripts/probar-tutor.js`, con `gemini-3.5-flash-lite`. El co
 
 **Pendiente:** citas con bibliografía real (cómo cita Gemini los bloques `[FUENTE n]`), observaciones sobre imágenes reales e inyección escondida dentro de un fragmento de bibliografía. Se pueden repetir con el mismo script cuando estén los materiales del docente.
 
+## Etapa 4 — Frontend (01/11/2026)
+
+`npm run build`: sin errores (JS 285 KB, 90 KB comprimido). `npm test` en `frontend/`: **10 tests, 10 pasan** (guardado en el navegador y regla de fases). `oxlint`: sin errores; quedan 3 avisos de estilo de React sin efecto en el funcionamiento.
+
+**Prueba en navegador real:** Edge en modo invisible, manejado por un script local con el protocolo de DevTools, contra el backend y el frontend corriendo en la PC de desarrollo con Gemini real.
+
+| Funcionalidad | Implementado | Probado (cómo) | Pendiente |
+|---|---|---|---|
+| Pantallas Inicio, Análisis, Cierre y Consigna; encabezado con cambio de tema | Sí | Navegador real + capturas revisadas | Exportación y consentimiento en Cierre (Etapa 5) |
+| Recorrido Inicio → Análisis con clics reales: datos del grupo bloqueados hasta aceptar el aviso; al aceptar, la vista baja al formulario; "Empezar" lleva a Análisis | Sí | Navegador real (clics de mouse simulados). Se agregó porque el usuario no encontró cómo seguir después de aceptar | — |
+| Diseño revisado por el usuario: letra Nunito y Fraunces "suave", más espaciado, opciones de comisión grandes, párrafos justificados desde 600 px (a la izquierda en celular) y presentación centrada | Sí | Capturas a 360 y 1280 px | — |
+| Sin scroll horizontal a 360, 768 y 1280 px | Sí | Navegador real: `scrollWidth` ≤ `clientWidth` en Inicio, Análisis, Cierre (los 3 anchos) y Consigna (768 px) | Dispositivos físicos (celulares y tablets del aula) |
+| Una columna en celular, dos columnas (corpus + chat) desde 900 px | Sí | Capturas a 360 y 1280 px | — |
+| Recargar conserva el historial | Sí | Navegador real: 4 mensajes antes y 4 después de recargar. Test unitario de `almacenamiento.js` | — |
+| Dos grupos o corpus en el mismo navegador no comparten historial | Sí | Test unitario | — |
+| Sin localStorage (modo privado): no se rompe y avisa | Sí | Test unitario (localStorage que lanza errores) | Probar en un navegador en modo privado real |
+| Botón de imágenes bloqueado hasta cumplir la regla, con el motivo visible | Sí | Navegador real: bloqueado al empezar ("Les falta: 2 mensajes más y unos 300 caracteres más"); habilitado después de 2 mensajes reales | — |
+| Fases visibles; botón "Pasar a la comparación" | Sí | Navegador real (muestra la fase 2 después de los 2 mensajes) + test unitario | — |
+| Chat: burbujas por rol, "pensando…", contador de caracteres, copiar, fuentes desplegables, scroll al último mensaje | Sí | Navegador real (envío y respuesta) + capturas | Fuentes con bibliografía real |
+| Visor del corpus con ficha y ampliación a pantalla completa | Sí | Capturas | Probar la ampliación con el dedo en un celular |
+| Dimensiones (abiertas en pantallas anchas, plegadas en celular) y bibliografía disponible | Sí | Capturas | — |
+| "Despertando el servidor" en el inicio, error de red, corte a los 60 s | Sí | Revisión de código | Probar con el backend dormido en Render (Etapa 6) |
+| Indicador "Guardado en este dispositivo" | Sí | Navegador real | — |
+| Accesibilidad: etiquetas en campos, `alt` en imágenes, foco visible, enlace "Saltar al contenido", `aria-live` en el chat, contraste | Sí | Revisión de código | Revisión con lector de pantalla |
+| `vercel.json` (todas las rutas sirven la app) | Sí | — | Despliegue (Etapa 6) |
+
+Cambio de diseño respecto de Nódos: el texto sobre el color de acento pasó a ser oscuro en el tema oscuro, y el acento del tema claro se oscureció un poco (`#b5523a`). Con los colores originales, el texto blanco sobre el coral no alcanzaba el contraste mínimo recomendado.
+
 ## Fuentes oficiales consultadas (01/11/2026)
 
 | Tema | URL | Dato usado |

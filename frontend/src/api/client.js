@@ -1,133 +1,77 @@
-// Todas las llamadas al backend pasan por aca. Se encarga de:
-// - agregar el token de autenticacion a cada request
-// - renovarlo solo con el refreshToken si el accessToken vencio
-// - traducir errores de red/CORS a un mensaje legible (en vez del "Failed to
-//   fetch" generico que tira el navegador)
-// - devolver errores en un formato consistente para el resto de la app
+// Todas las llamadas al backend pasan por acá (basado en el cliente de Nódos).
+// Se encarga de:
+// - cortar el pedido a los 60 s (AbortController)
+// - traducir errores de red, de servidor "despertando" y del backend a
+//   mensajes que se puedan entender y accionar
+// - devolver errores en un formato consistente ({ message, statusCode })
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/+$/, '');
+// Las imágenes del corpus las sirve el backend fuera de /api
+const URL_SERVIDOR = BASE_URL.replace(/\/api$/, '');
+const TIEMPO_MAXIMO_MS = 60_000;
 
 const MENSAJE_ERROR_RED =
-  'No se pudo conectar con el servidor. Revisá tu conexión a internet e intentá de nuevo en unos segundos.';
+  'No se pudo conectar con el servidor. Revisen la conexión a internet e intenten de nuevo en unos segundos.';
+const MENSAJE_SIN_CONEXION = 'El dispositivo no tiene conexión a internet. Revisen el wifi o los datos y vuelvan a intentar.';
+const MENSAJE_DESPERTANDO =
+  'El servidor está despertando: en el plan gratuito se duerme cuando no se usa y puede tardar hasta un minuto en arrancar. Esperen unos segundos y vuelvan a intentar.';
 
-function obtenerTokens() {
-  return {
-    accessToken: localStorage.getItem('nodos_accessToken'),
-    refreshToken: localStorage.getItem('nodos_refreshToken'),
-  };
-}
-
-function guardarTokens({ accessToken, refreshToken }) {
-  if (accessToken) localStorage.setItem('nodos_accessToken', accessToken);
-  if (refreshToken) localStorage.setItem('nodos_refreshToken', refreshToken);
-}
-
-function limpiarTokens() {
-  localStorage.removeItem('nodos_accessToken');
-  localStorage.removeItem('nodos_refreshToken');
-}
-
-function errorDeRed(causaOriginal) {
-  // fetch() lanza un TypeError generico ("Failed to fetch") cuando el
-  // problema es de red o CORS, antes de llegar a tener una respuesta real
-  // del servidor. Lo logueamos completo para debug, pero al usuario le
-  // mostramos un mensaje que pueda entender y accionar.
-  console.error('Fallo de red al llamar a la API:', causaOriginal);
-  const error = new Error(MENSAJE_ERROR_RED);
-  error.statusCode = 0;
+function crearError(mensaje, statusCode, extra = {}) {
+  const error = new Error(mensaje);
+  error.statusCode = statusCode;
+  Object.assign(error, extra);
   return error;
 }
 
-async function intentarRefrescar() {
-  const { refreshToken } = obtenerTokens();
-  if (!refreshToken) return null;
-
-  try {
-    const respuesta = await fetch(`${BASE_URL}/auth/refresh`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refreshToken }),
-    });
-    if (!respuesta.ok) return null;
-    const data = await respuesta.json();
-    guardarTokens({ accessToken: data.accessToken });
-    return data.accessToken;
-  } catch {
-    return null;
-  }
+function errorDeRed(causaOriginal) {
+  // fetch() lanza un TypeError genérico ("Failed to fetch") cuando falla la
+  // red o CORS. Se registra completo para diagnosticar, pero al usuario se le
+  // muestra un mensaje comprensible.
+  console.error('Falla de red al llamar a la API:', causaOriginal);
+  const sinConexion = typeof navigator !== 'undefined' && navigator.onLine === false;
+  return crearError(sinConexion ? MENSAJE_SIN_CONEXION : MENSAJE_ERROR_RED, 0);
 }
 
-// Wrapper principal. path es relativo (ej: "/nodos"), sin incluir /api.
-async function apiFetch(path, { method = 'GET', body, autenticado = true } = {}) {
-  const hacerRequest = async (token) => {
-    const headers = { 'Content-Type': 'application/json' };
-    if (autenticado && token) headers.Authorization = `Bearer ${token}`;
-
-    return fetch(`${BASE_URL}${path}`, {
-      method,
-      headers,
-      body: body ? JSON.stringify(body) : undefined,
-    });
-  };
-
-  const { accessToken } = obtenerTokens();
+// path es relativo a /api (por ejemplo "/corpus")
+async function apiFetch(path, { method = 'GET', body } = {}) {
+  const controlador = new AbortController();
+  const temporizador = setTimeout(() => controlador.abort(), TIEMPO_MAXIMO_MS);
   let respuesta;
-
   try {
-    respuesta = await hacerRequest(accessToken);
-  } catch (fallaDeRed) {
-    throw errorDeRed(fallaDeRed);
+    respuesta = await fetch(`${BASE_URL}${path}`, {
+      method,
+      headers: body ? { 'Content-Type': 'application/json' } : undefined,
+      body: body ? JSON.stringify(body) : undefined,
+      signal: controlador.signal,
+    });
+  } catch (falla) {
+    if (falla.name === 'AbortError') throw crearError(MENSAJE_DESPERTANDO, 0, { despertando: true });
+    throw errorDeRed(falla);
+  } finally {
+    clearTimeout(temporizador);
   }
 
-  // Si el token vencio (401) y la ruta requiere auth, intentamos refrescar UNA vez
-  if (respuesta.status === 401 && autenticado) {
-    const nuevoToken = await intentarRefrescar();
-    if (nuevoToken) {
-      try {
-        respuesta = await hacerRequest(nuevoToken);
-      } catch (fallaDeRed) {
-        throw errorDeRed(fallaDeRed);
-      }
-    } else {
-      limpiarTokens();
-    }
-  }
-
-  const data = await respuesta.json().catch(() => ({}));
-
+  const data = await respuesta.json().catch(() => null);
   if (!respuesta.ok) {
-    const error = new Error(data.mensaje || 'Ocurrio un error inesperado');
-    error.statusCode = respuesta.status;
-    throw error;
+    // Mientras el servicio arranca, Render responde con páginas que no son JSON
+    if (!data && [502, 503, 504].includes(respuesta.status)) {
+      throw crearError(MENSAJE_DESPERTANDO, respuesta.status, { despertando: true });
+    }
+    throw crearError(data?.mensaje || 'Ocurrió un error inesperado. Intenten de nuevo.', respuesta.status);
   }
-
   return data;
 }
 
 export const api = {
-  registro: (nombre, email, password) =>
-    apiFetch('/auth/registro', { method: 'POST', body: { nombre, email, password }, autenticado: false }),
-
-  login: (email, password) =>
-    apiFetch('/auth/login', { method: 'POST', body: { email, password }, autenticado: false }),
-
-  perfil: () => apiFetch('/auth/perfil'),
-
-  listarNodos: () => apiFetch('/nodos'),
-
-  marcarDominado: (nodoId) => apiFetch(`/nodos/${nodoId}/dominar`, { method: 'PATCH' }),
-  
-  crearNodo: (payload) => apiFetch('/nodos', { method: 'POST', body: payload }),
-
- editarNodo: (id, payload) => apiFetch(`/nodos/${id}`, { method: 'PATCH', body: payload }),
-
-  obtenerConversacion: (nodoId) => apiFetch(`/tutor/${nodoId}/conversacion`),
-
-
-  enviarMensajeTutor: (nodoId, mensaje) =>
-    apiFetch(`/tutor/${nodoId}/mensaje`, { method: 'POST', body: { mensaje } }),
-
-  evaluarNodo: (nodoId) => apiFetch(`/tutor/${nodoId}/evaluar`, { method: 'POST' }),
+  configTaller: () => apiFetch('/config-taller'),
+  listarCorpus: () => apiFetch('/corpus'),
+  obtenerCorpus: (id) => apiFetch(`/corpus/${encodeURIComponent(id)}`),
+  dimensiones: () => apiFetch('/dimensiones'),
+  consigna: () => apiFetch('/consigna'),
+  bibliografia: () => apiFetch('/bibliografia'),
+  chat: (cuerpo) => apiFetch('/chat', { method: 'POST', body: cuerpo }),
 };
 
-export { guardarTokens, limpiarTokens, obtenerTokens };
+export function urlImagen(ruta) {
+  return `${URL_SERVIDOR}${ruta}`;
+}
