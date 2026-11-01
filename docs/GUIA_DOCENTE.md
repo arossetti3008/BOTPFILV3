@@ -1,135 +1,147 @@
 # Guía docente — BOTPFILV3
 
-> En construcción. La sección de bibliografía ya está completa; el resto (clave de Gemini, corpus, imágenes, día del taller) se completa en la Etapa 6.
+Todo lo que hace falta para preparar y usar la aplicación en los talleres. No hace falta saber programar. Donde hay que tocar algo técnico, se indica quién lo hace.
 
-## Bibliografía desde Google Drive
+- **App para los grupos:** https://botpfilv-3.vercel.app
+- **Estado del servidor:** https://botpfilv3-backend.onrender.com/api/health
 
-Los estudiantes nunca ven los PDFs ni entran a Drive. La aplicación lee la carpeta con una **cuenta de servicio**, que es un "usuario robot" de Google con permiso de solo lectura. Después le envía al asistente únicamente los fragmentos que hacen falta para cada mensaje.
+---
 
-Se configura una sola vez. Después, para actualizar la bibliografía alcanza con subir el PDF a la carpeta, agregar su fila en la hoja `fuentes` y esperar hasta 30 minutos (o forzar la actualización, ver el paso 6).
+## 1. Materiales que aporta el docente
 
-### Paso 1. Crear la cuenta de servicio (Google Cloud)
-
-Usá el mismo proyecto de Google Cloud donde creaste la clave de Gemini.
-
-1. Entrá a https://console.cloud.google.com y elegí ese proyecto arriba a la izquierda.
-2. **Habilitá la Google Drive API:** menú → "APIs y servicios" → "Biblioteca" → buscá "Google Drive API" → "Habilitar".
-3. **Creá la cuenta:** menú → "IAM y administración" → "Cuentas de servicio" → "Crear cuenta de servicio". Ponele un nombre, por ejemplo `lector-bibliografia`. No hace falta asignarle roles: tocá "Listo".
-4. **Copiá su email.** Tiene la forma `lector-bibliografia@<proyecto>.iam.gserviceaccount.com`. Lo vas a usar en el paso 3.
-5. **Descargá la clave:** entrá a la cuenta → pestaña "Claves" → "Agregar clave" → "Crear clave nueva" → **JSON**. Se descarga un archivo `.json`.
-   - Guardalo en un lugar seguro: es una contraseña.
-   - No lo subas a GitHub, no lo mandes por chat y no lo pongas dentro de la carpeta compartida.
-
-### Paso 2. Armar la carpeta
-
-Creá una carpeta en tu Drive (por ejemplo `Bibliografía LV III`) con este contenido:
-
-```
-Bibliografía LV III/
-├── fuentes          ← Hoja de cálculo de Google con los datos de cada texto
-├── <capítulo 1>.pdf
-├── <capítulo 2>.pdf
-└── ...
-```
-
-- Se aceptan **PDF** y **Google Docs**. Cualquier otro tipo de archivo se ignora y queda una advertencia.
-- Los PDF tienen que tener **texto seleccionable**. Si es un escaneo (una foto de la página), la aplicación no puede leerlo y lo informa como "página sin texto". Ver "Si tenés PDFs escaneados" más abajo.
-- Volumen previsto: hasta unas 100 páginas en total.
-
-#### Si tenés PDFs escaneados
-
-**Cómo darte cuenta:** abrí el PDF y tratá de seleccionar una palabra con el mouse. Si no se puede, o se selecciona la página entera como una imagen, es un escaneo.
-
-**Qué hacer** (una sola vez por archivo, antes de subirlo):
-
-1. Pasalo por una herramienta de reconocimiento de texto (OCR) que genere un **PDF con texto que conserve las páginas originales**. Por ejemplo, Adobe Acrobat ("Escanear y OCR" → "Reconocer texto"), el software del escáner o cualquier herramienta "OCR a PDF".
-2. Revisá un par de páginas: seleccioná texto y fijate que se lea bien, sobre todo los nombres propios y las tildes.
-3. Subí a la carpeta **el PDF nuevo en lugar del escaneado**, con el mismo nombre que figura en la hoja `fuentes`.
-4. Forzá la actualización (paso 6) y confirmá en el reporte que ya no aparece "sin texto".
-
-**No conviene** convertirlo con "Abrir con → Documentos de Google": reconoce el texto, pero cambia la paginación, y el asistente citaría páginas que no coinciden con el libro.
-
-La aplicación no hace OCR por su cuenta, a propósito: el servidor gratuito no tiene memoria suficiente y tardaría minutos en cada arranque.
-
-### Paso 3. Compartir la carpeta con la cuenta de servicio
-
-En Drive: clic derecho en la carpeta → "Compartir" → pegá el email del paso 1 → permiso **Lector** → "Enviar". Si Drive avisa que el email no puede recibir notificaciones, está bien: compartí igual.
-
-### Paso 4. Completar la hoja `fuentes`
-
-Creá dentro de la carpeta una **Hoja de cálculo de Google** llamada exactamente `fuentes`. La primera fila lleva estos encabezados, **escritos exactamente así**:
-
-| archivo | autor | anio | titulo | referenciaAPA | paginaInicial | dimensiones | corpus |
-|---|---|---|---|---|---|---|---|
-| EJEMPLO — reemplazar.pdf | EJEMPLO Apellido, N. | 2000 | EJEMPLO — título del capítulo | EJEMPLO Apellido, N. (2000). Título. Editorial. | 23 | retorico, enunciativo | todos |
-
-Qué va en cada columna:
-
-| Columna | Obligatoria | Qué poner |
+| Material | Dónde va | Estado al 01/11/2026 |
 |---|---|---|
-| `archivo` | Sí | El nombre **exacto** del archivo en la carpeta, con `.pdf` si lo tiene. En un Google Doc, su título tal cual. |
-| `autor` | Sí | Como querés que lo cite el asistente. |
-| `anio` | Sí | Año de publicación. |
-| `titulo` | Sí | Título del capítulo o texto. |
-| `referenciaAPA` | Recomendada | La referencia completa en APA. Los estudiantes la ven en la lista de bibliografía. |
-| `paginaInicial` | Recomendada | El número de página **impreso** en la primera página del PDF. Si el PDF empieza en la página 23 del libro, poné `23`, y el asistente va a citar "p. 24" cuando el fragmento esté en la segunda hoja del PDF. Si la dejás vacía, cita "p. 2 del PDF". |
-| `dimensiones` | No | Dimensiones de análisis con las que se relaciona, separadas por coma. Por ahora es informativo. |
-| `corpus` | No | Ids de los corpus (de `corpus.json`) a los que corresponde, separados por coma, o `todos`. Esas fuentes tienen prioridad cuando un grupo trabaja con ese corpus. |
+| PDFs de la bibliografía, con texto seleccionable | Carpeta de Drive "Bibliografía LV 3" | ✅ 6 PDFs. Giglietti tiene páginas ilegibles: conviene pasarlo por OCR. |
+| Hoja `fuentes` con los datos de cada PDF | La misma carpeta | ⏳ Falta. Hay un borrador listo (instructivo, paso 3). |
+| Cuenta de servicio y carpeta compartida con ella | Google Cloud y Drive | ⏳ Falta ([instructivo](INSTRUCTIVO_DOCENTE_BIBLIOGRAFIA.md), pasos 1, 2 y 4). |
+| Corpus: problemática, eje y 3 imágenes con su ficha | `backend/contenidos/corpus/` | ✅ Corpus 1, "Representaciones de la feminidad". |
+| Texto final del aviso de IA y privacidad | `backend/contenidos/taller.json` | ⏳ Borrador: el docente lo confirma (sección 4). |
+| Instrucciones de entrega de evidencias | `backend/contenidos/entrega-evidencias.md` | ⏳ Dice "EJEMPLO": hay que completarlo (sección 4). |
+| Clave de Gemini (plan gratuito) | Render, variable `LLM_API_KEY` | ✅ Cargada. |
 
-Reglas:
+---
 
-- **Archivo sin fila en la hoja, o fila sin archivo:** se omite y queda una advertencia. La aplicación nunca inventa datos.
-- **Fila sin `autor`, `anio` o `titulo`:** se omite.
+## 2. Bibliografía (Google Drive)
 
-### Paso 5. Cargar las credenciales en el backend
+El paso a paso completo, pensado para quien no tiene experiencia técnica, está en **[INSTRUCTIVO_DOCENTE_BIBLIOGRAFIA.md](INSTRUCTIVO_DOCENTE_BIBLIOGRAFIA.md)**: cuenta de servicio, compartir la carpeta, hoja `fuentes`, envío seguro de la clave y PDFs escaneados.
 
-En las variables de entorno del backend (en Render: "Environment"; en local: `backend/.env`):
+**Actualizar la bibliografía más adelante:** subí el PDF a la carpeta, agregá su fila en la hoja `fuentes` y esperá hasta 30 minutos. No hace falta tocar código ni volver a publicar la app.
 
-| Variable | Valor |
+**Forzar la actualización al instante.** Lo hace quien administra la app:
+
+1. En Render → `botpfilv3-backend` → **Environment**, copiá el valor de `ADMIN_TOKEN`.
+2. En PowerShell (Windows):
+
+```powershell
+Invoke-RestMethod -Method Post -Uri "https://botpfilv3-backend.onrender.com/api/admin/sincronizar" -Headers @{ "x-admin-token" = "PEGAR_AQUI_EL_ADMIN_TOKEN" }
+```
+
+La respuesta es un reporte: cuántas fuentes, páginas y fragmentos indexó, y las advertencias (por ejemplo, "página sin texto" o "falta la fila en la hoja").
+
+---
+
+## 3. Cargar o cambiar un corpus
+
+Cada corpus tiene **exactamente 3 imágenes**. Se guarda en dos lugares de `backend/contenidos/corpus/`:
+
+- **`imagenes/`**: los archivos JPG, PNG o WEBP.
+  - **Peso recomendado: menos de 500 KB y como máximo 1600 px de lado**, porque se ven desde celulares y viajan a Gemini.
+  - La app avisa en `/api/health` si alguna pesa de más.
+- **`corpus.json`**: los datos de cada corpus.
+
+Ejemplo de un corpus dentro de `corpus.json`:
+
+```json
+{
+  "id": "corpus-2-ejemplo",
+  "titulo": "Corpus 2 — Título que ven los grupos",
+  "problematica": "La problemática sociocultural del corpus.",
+  "ejeComparabilidad": "Qué comparten las tres piezas y qué permite compararlas.",
+  "imagenes": [
+    {
+      "id": "img1",
+      "archivo": "01_nombre_del_archivo.jpg",
+      "titulo": "Título de la obra",
+      "autor": "Autor o autora",
+      "anio": "1990",
+      "soporte": "Afiche, fotografía, pintura…",
+      "procedencia": "Museo o archivo, ciudad",
+      "fuente": "https://dirección-de-la-ficha-de-la-obra",
+      "textoAlternativo": "Descripción breve de la imagen para personas que usan lectores de pantalla."
+    }
+  ]
+}
+```
+
+(En el archivo real van las 3 imágenes. Si hay más de un corpus, van uno después del otro, separados por coma, dentro de los corchetes `[ ]`.)
+
+Cómo se usan algunos campos:
+
+- **`id`**: sin espacios ni tildes. También va en la columna `corpus` de la hoja `fuentes`, para que esa bibliografía tenga prioridad.
+- **`textoAlternativo`**: **el asistente no lo recibe**. Así no "ve" la imagen sin que el grupo la describa.
+- **Ficha** (título, autor, año, soporte, procedencia): el asistente sí la recibe.
+
+**Cómo publicar el cambio:** los archivos de `backend/contenidos/` están en GitHub. Hay dos formas:
+- Pedírselo a quien administra la app.
+- Editarlos desde la web de GitHub (abrir el archivo → ícono del lápiz → **Commit changes**, en la rama `main`). Para subir imágenes: carpeta `imagenes` → **Add file → Upload files**.
+
+Render se actualiza solo en uno o dos minutos. Si el corpus tiene un error (por ejemplo, 2 imágenes en lugar de 3, o un archivo que no existe), no se ofrece a los grupos y `/api/health` dice cuál es el problema.
+
+---
+
+## 4. Textos que el docente puede editar
+
+Todos están en `backend/contenidos/` y se publican igual que el corpus (sección 3).
+
+| Archivo | Qué contiene |
 |---|---|
-| `DRIVE_FOLDER_ID` | El id de la carpeta: la parte final de su dirección, después de `/folders/`. En `https://drive.google.com/drive/folders/1AbC...xyz`, es `1AbC...xyz`. |
-| `GOOGLE_SERVICE_ACCOUNT_JSON_BASE64` | El archivo `.json` del paso 1, convertido a base64 (ver abajo). |
-| `ADMIN_TOKEN` | Una contraseña larga inventada, para forzar la actualización (ver abajo). |
-| `DRIVE_RESYNC_MINUTOS` | Cada cuántos minutos revisa si hay cambios. Por defecto, `30`. |
+| `taller.json` | **Aviso de IA y privacidad** (la lista `puntos`), texto de la casilla "Leí y entiendo", comisiones y formato del código de grupo. |
+| `entrega-evidencias.md` | Instrucciones de entrega que ven los grupos en la pantalla de cierre. Hoy dicen **EJEMPLO**. |
+| `dimensiones.json` | Las 5 dimensiones, con descripción y preguntas guía tomadas de la consigna. |
+| `consigna.md` | La consigna que se abre desde el inicio. |
 
-**Convertir el JSON a base64** en Windows (PowerShell), cambiando la ruta por la de tu archivo:
+**Sobre el aviso:** tiene que conservar el punto que dice que lo escrito se envía a Google y que, en el plan gratuito, puede usarse para mejorar sus productos y ser leído por revisores. Lo exigen los términos de Gemini y es lo que justifica pedir que no escriban datos personales.
 
-```powershell
-[Convert]::ToBase64String([IO.File]::ReadAllBytes("C:\ruta\al\archivo.json")) | Set-Clipboard
-```
+**Códigos de grupo:** por defecto, M1 a M99 para la mañana y T1 a T99 para la tarde. Conviene repartirlos antes de empezar (M1, M2… en papel o en el pizarrón).
 
-Queda copiado en el portapapeles, listo para pegar como valor de la variable.
+Las **instrucciones del asistente** (el "prompt") están en `backend/src/prompts/tutorLV3.js`. Si se cambian, conviene repetir las conversaciones de prueba (`docs/pruebas-tutor/`).
 
-**Generar un `ADMIN_TOKEN`:**
+---
 
-```powershell
-node -e "console.log(require('crypto').randomBytes(24).toString('hex'))"
-```
+## 5. Lista de control para el día del taller
 
-### Paso 6. Verificar y forzar la actualización
+**El día anterior**
+- [ ] Abrir `/api/health` y revisar:
+  - `"estado": "ok"`;
+  - `"corpusDisponibles": 1` o más;
+  - `bibliografia.estado` en `"ok"`, con la cantidad de fuentes esperada.
+- [ ] Probar la app de punta a punta desde un celular: entrar con un código de prueba (por ejemplo **M99**), mandar dos mensajes, exportar y borrar.
+- [ ] Repartir o anotar los códigos de grupo.
+- [ ] Confirmar cómo entregan los archivos (sección 4, `entrega-evidencias.md`).
 
-- **Ver el estado:** abrí `https://<tu-backend>/api/health` en el navegador. En `bibliografia` aparecen:
-  - `estado`, que debería decir `ok`;
-  - la fecha de la última sincronización;
-  - las fuentes, las páginas y las páginas sin texto;
-  - las `advertencias`.
-- **Forzar la actualización** después de subir un archivo, sin esperar los 30 minutos (PowerShell):
+**5 minutos antes de empezar**
+- [ ] **Abrir la app** (https://botpfilv-3.vercel.app). El servidor gratuito se "duerme" después de 15 minutos sin uso y tarda hasta un minuto en despertar. Si se abre antes, los grupos no esperan.
 
-```powershell
-Invoke-RestMethod -Method Post -Uri "https://<tu-backend>/api/admin/sincronizar" -Headers @{ "x-admin-token" = "<tu ADMIN_TOKEN>" }
-```
+**Al empezar, decirle a los grupos**
+- Leer el aviso y no escribir nombres ni datos personales.
+- Usar **un solo dispositivo por grupo** y no usar ventanas privadas o de incógnito: la conversación se guarda en ese dispositivo.
+- El asistente no hace el análisis: primero piden su interpretación, después la revisan con la bibliografía y al final comparan.
+- **Exportar antes de irse** (botón "Terminar y exportar").
 
-Devuelve un reporte con fuentes, páginas, fragmentos, palabras y advertencias.
+**Al terminar**
+- [ ] Recibir los archivos exportados. El nombre identifica comisión, grupo, corpus, fecha y hora.
+- [ ] Pedir que borren la conversación del dispositivo si es compartido (botón "Borrar conversación" en el cierre).
 
-### Si algo falla
+---
 
-| Mensaje en `/api/health` | Qué revisar |
+## 6. Problemas durante el taller
+
+| Lo que ven los grupos | Qué pasa y qué hacer |
 |---|---|
-| `Google rechazó las credenciales…` | Que el base64 sea del `.json` correcto y que la clave no haya sido borrada en Google Cloud. |
-| `Drive no encontró la carpeta…` | `DRIVE_FOLDER_ID`, y que la carpeta esté compartida con el email de la cuenta de servicio. |
-| `Drive negó el acceso…` | Que la Google Drive API esté habilitada en el proyecto (paso 1). |
-| `No se encontró la hoja "fuentes"` | Que la hoja se llame exactamente `fuentes` y esté dentro de la carpeta. |
-| `A la hoja "fuentes" le faltan columnas…` | Los encabezados de la primera fila (paso 4). |
-| `…página N del PDF: sin texto` | El PDF es un escaneo. Conseguí una versión con texto seleccionable. |
-
-Si Drive falla, el chat sigue funcionando: con la bibliografía de la última sincronización correcta, o sin fuentes si nunca se pudo sincronizar. En ese caso el asistente avisa que no puede citar.
+| "El servidor está despertando…" | Normal la primera vez: esperar hasta un minuto. |
+| "El asistente está atendiendo a varios grupos, esperá unos segundos" | Se alcanzó el tope por minuto: reenviar en unos segundos. |
+| "Están enviando mensajes muy rápido" | Ese grupo superó 6 mensajes por minuto: esperar un minuto. |
+| "Se agotó la cuota diaria gratuita del asistente" | Se agotaron los 2 modelos (principal y respaldo). Ver "Plan B" en el [README](../README.md). Mientras tanto pueden seguir con la consigna, las dimensiones y la bibliografía, y exportar lo ya conversado. |
+| "Este navegador no permite guardar…" | Están en una ventana privada: si recargan, se pierde la conversación. Exportar seguido o cambiar a una ventana normal. |
+| "La clave de Gemini no es válida…" | Revisar `LLM_API_KEY` en Render (lo hace quien administra la app). |
+| Un grupo cerró la pestaña | No se pierde nada: al volver a entrar con el mismo dispositivo aparece "Tienen una conversación en curso → Volver a la conversación". |
