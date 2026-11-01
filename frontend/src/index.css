@@ -489,6 +489,9 @@ a:focus-visible {
 
 /* ---------- Cierre y consigna ---------- */
 .cierre { max-width: 720px; margin: 0 auto; }
+.exportar-botones { margin-top: 20px; }
+.exportar-botones button { flex: 1 1 220px; }
+.centrado { text-align: center; }
 .resumen { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 12px 0; }
 .resumen dt { font-weight: 600; color: var(--texto-suave); }
 .resumen dd { margin: 0; }

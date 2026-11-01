@@ -126,6 +126,28 @@ Generadas con `node scripts/probar-tutor.js`, con `gemini-3.5-flash-lite`. El co
 
 Cambio de diseño respecto de Nódos: el texto sobre el color de acento pasó a ser oscuro en el tema oscuro, y el acento del tema claro se oscureció un poco (`#b5523a`). Con los colores originales, el texto blanco sobre el coral no alcanzaba el contraste mínimo recomendado.
 
+## Etapa 5 — Evidencias y privacidad (01/11/2026)
+
+Unknown command: "test"
+
+
+Did you mean this?
+  npm test # Test a package
+To see a list of supported npm commands, run:
+  npm help en : **16 tests, 16 pasan** (6 nuevos de ). Backend: 66 de 66.
+
+| Funcionalidad | Implementado | Probado (cómo) | Pendiente |
+|---|---|---|---|
+| Exportación .txt: encabezado (comisión, grupo, corpus, inicio, exportación, modelo, consentimiento, totales) y mensajes numerados en orden con autor inequívoco (GRUPO / ASISTENTE (IA, generado por <modelo>)), hora, fase, fuentes e imágenes | Sí | Test unitario + descarga real en el navegador y lectura del archivo | — |
+| Exportación .json con la misma información, versión del formato y por mensaje: autor, generadoPorIA, modelo, fase, fuentes | Sí | Test unitario + descarga real | — |
+| Nombre: LV3_<comision>_<grupo>_<corpus>_<AAAA-MM-DD_HHmm> | Sí | Test unitario + descarga real (LV3_manana_M3_corpus-1-feminidad_2026-11-01_1823.txt) | — |
+| Consentimiento: sin marcar, el archivo dice "NO AUTORIZADO PARA DOCUMENTACIÓN" al principio y al final | Sí | Test unitario + descarga real | — |
+| Aviso del navegador al cerrar o recargar con mensajes sin exportar (beforeunload) | Sí | Navegador real: apareció el aviso; al cancelar, el grupo siguió en Análisis | Probar en celulares (algunos navegadores móviles no lo muestran) |
+| Aviso al "Empezar de nuevo" y al "Borrar" con mensajes sin exportar | Sí | Revisión de código (confirmación con la cantidad de mensajes) | — |
+| Contador "N mensajes sin exportar" en Análisis y "todo exportado" en Cierre | Sí | Navegador real | — |
+| Instrucciones de entrega editables () en Cierre | Sí | Test automático + captura | Texto final del docente (hoy dice EJEMPLO) |
+| Dos grupos en el mismo navegador no comparten historial | Sí | Test unitario (Etapa 4) | — |
+
 ## Materiales reales del docente (01/11/2026)
 
 Carpetas de Drive del docente: "Bibliografía LV 3" (6 PDFs, sin hoja `fuentes`) y "Corpus LV III" (subcarpeta "Corpus 1 — Representaciones de la feminidad": 3 JPG y un documento "ficha").

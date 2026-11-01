@@ -11,7 +11,8 @@ import EstadoServidor from '../components/EstadoServidor';
 import Fases from '../components/Fases';
 import { useSesion } from '../context/SesionContext';
 import { useConversacion } from '../hooks/useConversacion';
-import { claveConversacion } from '../utils/almacenamiento';
+import { useAvisoSalida } from '../hooks/useAvisoSalida';
+import { claveConversacion, mensajesSinExportar } from '../utils/almacenamiento';
 import { motivoBloqueo } from '../utils/fases';
 
 const TEXTO_PEDIR_IMAGENES = 'Queremos tus observaciones sobre las imágenes, para contrastarlas con nuestra lectura.';
@@ -30,6 +31,10 @@ function AreaAnalisis({ sesion, corpus, limites }) {
     enviar,
   } = useConversacion(sesion, corpus, limites);
   const [texto, setTexto] = useState('');
+  const sinExportar = mensajesSinExportar(conversacion);
+
+  // Pide confirmación al cerrar o recargar si hay mensajes sin exportar
+  useAvisoSalida(sinExportar > 0);
 
   // Envía el texto escrito (o uno por defecto para los botones especiales).
   // Si falla, el texto vuelve al cuadro para reenviarlo.
@@ -136,6 +141,11 @@ function AreaAnalisis({ sesion, corpus, limites }) {
         <Link to="/cierre" className="boton-secundario boton-ancho enlace-boton">
           Terminar y exportar →
         </Link>
+        {sinExportar > 0 && (
+          <p className="ayuda centrado">
+            {sinExportar} mensaje{sinExportar > 1 ? 's' : ''} sin exportar. Exporten antes de irse.
+          </p>
+        )}
       </section>
     </div>
   );

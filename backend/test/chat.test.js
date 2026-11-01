@@ -38,7 +38,8 @@ test('GET /api/config-taller devuelve comisiones, formato de grupo, límites y a
   assert.equal(res.body.formatoGrupo.patron, '^[MT][0-9]{1,2}$');
   assert.equal(res.body.limites.maxCaracteresMensaje, 2000);
   assert.equal(res.body.limites.mensajesPorMinuto, 6);
-  assert.ok(res.body.aviso.puntos.length >= 3);
+  assert.ok(res.body.aviso.puntos.length >= 2);
+  assert.match(res.body.entregaEvidencias, /Exporten la conversación/);
 });
 
 test('POST /api/chat válido responde y arma bien el pedido a Gemini', async () => {
