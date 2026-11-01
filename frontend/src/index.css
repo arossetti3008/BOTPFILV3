@@ -1,0 +1,184 @@
+/* ============================================
+   TOKENS DE DISENO — Nodos
+   Fuente de verdad: las capturas reales de Figma AI del TP
+   (tema oscuro, acento coral). El modo claro queda disponible
+   como alternativa real via el toggle "Modo oscuro" del Perfil.
+   ============================================ */
+:root,
+[data-theme='dark'] {
+  --bg: #1c1815;
+  --bg-elevada: #262019;
+  --bg-card: #2e2620;
+  --texto: #f2ece2;
+  --texto-suave: #a89f90;
+  --acento: #e8734a;
+  --acento-oscuro: #c85f39;
+  --acento-suave: #3a2a20;
+  --bloqueado: #7a7266;
+  --bloqueado-bg: #2a2621;
+  --borde: #3a332c;
+  --error: #e6796b;
+  --exito: #7fb88a;
+  --azul: #6f9bd1;
+  --amarillo: #d9b25f;
+
+  --fuente-display: 'Fraunces', Georgia, serif;
+  --fuente-cuerpo: 'Inter', -apple-system, sans-serif;
+  --radio: 16px;
+  --radio-chico: 10px;
+  --sombra: 0 4px 18px rgba(0, 0, 0, 0.28);
+}
+
+[data-theme='light'] {
+  --bg: #f3eee3;
+  --bg-elevada: #faf7ef;
+  --bg-card: #ffffff;
+  --texto: #2c2a4a;
+  --texto-suave: #6b6883;
+  --acento: #dc7b63;
+  --acento-oscuro: #c36249;
+  --acento-suave: #f3d5cb;
+  --bloqueado: #b7afa0;
+  --bloqueado-bg: #ece7d9;
+  --borde: #e2dcc9;
+  --error: #b3432f;
+  --exito: #4f7a5b;
+  --azul: #4a6fa5;
+  --amarillo: #b3892f;
+  --sombra: 0 4px 16px rgba(44, 42, 74, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--texto);
+  font-family: var(--fuente-cuerpo);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+h1, h2, h3 {
+  font-family: var(--fuente-display);
+  font-weight: 600;
+  margin: 0;
+  color: var(--texto);
+}
+
+p { margin: 0; }
+button { font-family: var(--fuente-cuerpo); cursor: pointer; }
+input, textarea { font-family: var(--fuente-cuerpo); }
+a { color: inherit; }
+
+button:focus-visible, input:focus-visible, textarea:focus-visible, a:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+.pantalla {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--bg);
+  position: relative;
+  padding-bottom: 76px;
+}
+
+.contenido { flex: 1; padding: 20px 20px 24px; }
+
+.tarjeta {
+  background: var(--bg-elevada);
+  border-radius: var(--radio);
+  padding: 18px;
+  box-shadow: var(--sombra);
+}
+
+.eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--acento);
+  text-transform: uppercase;
+}
+
+.boton-primario {
+  background: var(--acento);
+  color: #fff;
+  border: none;
+  border-radius: var(--radio-chico);
+  padding: 14px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  transition: background 0.15s ease;
+}
+.boton-primario:hover { background: var(--acento-oscuro); }
+.boton-primario:disabled { background: var(--bloqueado); cursor: not-allowed; }
+
+.boton-secundario {
+  background: transparent;
+  color: var(--texto);
+  border: 1.5px solid var(--borde);
+  border-radius: var(--radio-chico);
+  padding: 13px 20px;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.campo { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.campo label { font-size: 13px; font-weight: 600; color: var(--texto-suave); }
+.campo input {
+  border: 1.5px solid var(--borde);
+  border-radius: var(--radio-chico);
+  padding: 12px 14px;
+  font-size: 15px;
+  background: var(--bg-card);
+  color: var(--texto);
+}
+
+.mensaje-error {
+  background: color-mix(in srgb, var(--error) 18%, transparent);
+  color: var(--error);
+  border-radius: var(--radio-chico);
+  padding: 10px 14px;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.toggle {
+  position: relative;
+  width: 42px;
+  height: 24px;
+  border-radius: 12px;
+  background: var(--bloqueado-bg);
+  border: 1px solid var(--borde);
+  cursor: pointer;
+  transition: background 0.15s ease;
+  flex-shrink: 0;
+}
+.toggle[data-activo='true'] { background: var(--acento); }
+.toggle-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.15s ease;
+}
+.toggle[data-activo='true'] .toggle-knob { transform: translateX(18px); }
