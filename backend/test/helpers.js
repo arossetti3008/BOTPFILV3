@@ -5,6 +5,8 @@ const { cargarConfig } = require('../src/config');
 const { crearApp } = require('../src/app');
 
 const CORPUS_ID = 'EJEMPLO-corpus-1';
+// Los tests usan un corpus de ejemplo propio, independiente del corpus real
+const CARPETA_CORPUS_PRUEBA = require('node:path').join(__dirname, 'fixtures', 'corpus');
 
 // Los tests no necesitan ver los logs del servidor; VERBOSE=1 los muestra
 function silenciarConsola() {
@@ -61,7 +63,12 @@ function fetchSimulado(respuestas = () => respuestaGemini('Respuesta simulada de
 
 function appDePrueba({ env, respuestas, esperar } = {}) {
   const simulado = fetchSimulado(respuestas);
-  const app = crearApp({ config: configPrueba(env), fetchImpl: simulado.fetchImpl, esperar: esperar || (async () => {}) });
+  const app = crearApp({
+    config: configPrueba(env),
+    fetchImpl: simulado.fetchImpl,
+    esperar: esperar || (async () => {}),
+    carpetaCorpus: CARPETA_CORPUS_PRUEBA,
+  });
   return { app, llamadas: simulado.llamadas };
 }
 
@@ -91,6 +98,7 @@ function historialConInterpretacion(mensajeFinal = 'Pasemos a comparar.') {
 
 module.exports = {
   CORPUS_ID,
+  CARPETA_CORPUS_PRUEBA,
   CUOTA_DIARIA_AGOTADA,
   silenciarConsola,
   configPrueba,

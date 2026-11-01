@@ -27,6 +27,7 @@ function appConDrive({ env = {}, respuestas, archivos } = {}) {
     fetchImpl: gemini.fetchImpl,
     fetchDrive: drive.fetchDrive,
     esperar: async () => {},
+    carpetaCorpus: h.CARPETA_CORPUS_PRUEBA,
   });
   return { app, drive, llamadas: gemini.llamadas, bibliografia: app.locals.bibliografia };
 }

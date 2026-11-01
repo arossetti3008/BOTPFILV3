@@ -1,0 +1,63 @@
+# Configuración del backend en Render (Blueprint).
+# En Render: New → Blueprint → elegir este repositorio. Render lee este archivo
+# y crea el servicio. Los valores secretos (sync: false) se cargan a mano en
+# el panel de Render y nunca se guardan en el repositorio.
+services:
+  - type: web
+    name: botpfilv3-backend
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
+      # URL exacta del frontend en Vercel, sin barra final (se completa después de crear Vercel)
+      - key: FRONTEND_URL
+        sync: false
+      # Gemini (clave del plan gratuito, creada en AI Studio)
+      - key: LLM_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-3.5-flash-lite
+      - key: GEMINI_MODEL_RESPALDO
+        value: gemini-3.1-flash-lite
+      - key: GEMINI_TEMPERATURA
+        value: "0.6"
+      - key: GEMINI_MAX_TOKENS_SALIDA
+        value: "800"
+      - key: GEMINI_RPM_MAX
+        value: "12"
+      - key: GEMINI_RPD_MAX
+        value: "450"
+      - key: GEMINI_RPD_MAX_RESPALDO
+        value: "450"
+      # Límites del chat
+      - key: MAX_CARACTERES_MENSAJE
+        value: "2000"
+      - key: MAX_MENSAJES_HISTORIAL
+        value: "20"
+      - key: MAX_MENSAJES_POR_MINUTO
+        value: "6"
+      - key: MAX_MENSAJES_SESION
+        value: "70"
+      - key: TOP_FRAGMENTOS
+        value: "4"
+      - key: MIN_MENSAJES_ANTES_IMAGENES
+        value: "2"
+      - key: MIN_CARACTERES_ANTES_IMAGENES
+        value: "300"
+      # Bibliografía en Google Drive
+      - key: DRIVE_FOLDER_ID
+        sync: false
+      - key: GOOGLE_SERVICE_ACCOUNT_JSON_BASE64
+        sync: false
+      - key: DRIVE_RESYNC_MINUTOS
+        value: "30"
+      # Contraseña para forzar la sincronización (Render la genera sola)
+      - key: ADMIN_TOKEN
+        generateValue: true

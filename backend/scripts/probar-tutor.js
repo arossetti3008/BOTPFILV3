@@ -165,7 +165,7 @@ const esperar = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 function prepararCorpusTemporal() {
   const carpeta = fs.mkdtempSync(path.join(os.tmpdir(), 'botpfilv3-corpus-'));
   fs.mkdirSync(path.join(carpeta, 'imagenes'));
-  const origen = path.join(__dirname, '..', 'contenidos', 'corpus', 'imagenes');
+  const origen = path.join(__dirname, '..', 'test', 'fixtures', 'corpus', 'imagenes');
   for (const n of [1, 2, 3]) {
     fs.copyFileSync(path.join(origen, `EJEMPLO-${n}.jpg`), path.join(carpeta, 'imagenes', `EJEMPLO-${n}.jpg`));
   }

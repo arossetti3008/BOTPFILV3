@@ -1,0 +1,40 @@
+[
+  {
+    "id": "EJEMPLO-corpus-1",
+    "titulo": "EJEMPLO — reemplazar",
+    "problematica": "EJEMPLO — reemplazar",
+    "ejeComparabilidad": "EJEMPLO — reemplazar",
+    "imagenes": [
+      {
+        "id": "img1",
+        "archivo": "EJEMPLO-1.jpg",
+        "titulo": "EJEMPLO",
+        "autor": "EJEMPLO",
+        "anio": "EJEMPLO",
+        "soporte": "EJEMPLO (afiche, fotografía publicitaria, pintura…)",
+        "procedencia": "EJEMPLO (fuente, URL o archivo de origen)",
+        "textoAlternativo": "EJEMPLO — descripción breve para lectores de pantalla"
+      },
+      {
+        "id": "img2",
+        "archivo": "EJEMPLO-2.jpg",
+        "titulo": "EJEMPLO",
+        "autor": "EJEMPLO",
+        "anio": "EJEMPLO",
+        "soporte": "EJEMPLO (afiche, fotografía publicitaria, pintura…)",
+        "procedencia": "EJEMPLO (fuente, URL o archivo de origen)",
+        "textoAlternativo": "EJEMPLO — descripción breve para lectores de pantalla"
+      },
+      {
+        "id": "img3",
+        "archivo": "EJEMPLO-3.jpg",
+        "titulo": "EJEMPLO",
+        "autor": "EJEMPLO",
+        "anio": "EJEMPLO",
+        "soporte": "EJEMPLO (afiche, fotografía publicitaria, pintura…)",
+        "procedencia": "EJEMPLO (fuente, URL o archivo de origen)",
+        "textoAlternativo": "EJEMPLO — descripción breve para lectores de pantalla"
+      }
+    ]
+  }
+]
