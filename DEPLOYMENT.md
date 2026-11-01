@@ -26,7 +26,7 @@ Primero Render (para obtener la URL del backend), después Vercel (que necesita 
 | `LLM_API_KEY` | La clave de Gemini (AI Studio). |
 | `FRONTEND_URL` | Por ahora poné `https://example.com`. Se corrige en el paso 3. |
 | `DRIVE_FOLDER_ID` | `1WM4dhEaXClSmRNln8pt_LPeFcWdiDqnA` (carpeta "Bibliografía LV 3"). |
-| `GOOGLE_SERVICE_ACCOUNT_JSON_BASE64` | El JSON de la cuenta de servicio en base64 (ver `docs/GUIA_DOCENTE.md`). Si todavía no está, dejalo vacío: la app funciona sin bibliografía. |
+| `GOOGLE_SERVICE_ACCOUNT_JSON_BASE64` | El contenido del archivo `.json` de la cuenta de servicio: abrilo con el Bloc de notas, copiá **todo** y pegalo tal cual (también acepta el texto en base64). Ver `docs/INSTRUCTIVO_DOCENTE_BIBLIOGRAFIA.md`. Si todavía no está, dejalo vacío: la app funciona sin bibliografía. |
 
 4. **Apply**. El primer despliegue tarda unos minutos. Al terminar, copiá la URL del servicio (por ejemplo `https://botpfilv3-backend.onrender.com`).
 5. Comprobá que responde: abrí `<URL>/api/health`. Tiene que mostrar `"estado": "ok"`.

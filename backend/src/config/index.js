@@ -23,12 +23,13 @@ function texto(valor) {
   return (valor || '').trim();
 }
 
-// Credenciales de la cuenta de servicio: el JSON que descarga Google Cloud,
-// codificado en base64 para que entre en una sola variable de entorno
-function leerCredenciales(base64, problemas) {
-  if (!base64) return null;
+// Credenciales de la cuenta de servicio: el archivo JSON que descarga Google
+// Cloud. Se acepta pegado tal cual (empieza con "{") o codificado en base64.
+function leerCredenciales(valor, problemas) {
+  if (!valor) return null;
   try {
-    const datos = JSON.parse(Buffer.from(base64, 'base64').toString('utf8'));
+    const texto = valor.startsWith('{') ? valor : Buffer.from(valor, 'base64').toString('utf8');
+    const datos = JSON.parse(texto);
     if (!datos.client_email || !datos.private_key) throw new Error('faltan client_email o private_key');
     return { client_email: datos.client_email, private_key: datos.private_key, token_uri: datos.token_uri };
   } catch (error) {

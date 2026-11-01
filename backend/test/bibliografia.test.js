@@ -150,6 +150,14 @@ test('con credenciales inválidas el servidor arranca y /api/health lo informa',
   assert.match(llamadas[0].cuerpo.system_instruction.parts[0].text, /bibliografía no está disponible/);
 });
 
+test('credenciales pegadas tal cual (JSON sin base64) también funcionan', async () => {
+  const { app, bibliografia } = appConDrive({ env: { GOOGLE_SERVICE_ACCOUNT_JSON_BASE64: JSON.stringify(d.CREDENCIALES) } });
+  await bibliografia.sincronizar();
+  const salud = await request(app).get('/api/health');
+  assert.equal(salud.body.bibliografia.estado, 'ok');
+  assert.equal(salud.body.fuentesIndexadas, 2);
+});
+
 test('credenciales mal codificadas: el servidor arranca y lo informa en problemas', async () => {
   const { app } = appConDrive({ env: { GOOGLE_SERVICE_ACCOUNT_JSON_BASE64: 'esto-no-es-json' } });
   const salud = await request(app).get('/api/health');
