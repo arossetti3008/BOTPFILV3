@@ -1,39 +1,39 @@
 [
   {
-    "id": "EJEMPLO-corpus-1",
-    "titulo": "EJEMPLO — reemplazar",
-    "problematica": "EJEMPLO — reemplazar",
-    "ejeComparabilidad": "EJEMPLO — reemplazar",
+    "id": "corpus-1-feminidad",
+    "titulo": "Corpus 1 — Representaciones de la feminidad en la cultura visual",
+    "problematica": "La construcción y el cuestionamiento de las representaciones de la feminidad en la cultura visual contemporánea, considerando las relaciones entre cuerpo, identidad y poder.",
+    "ejeComparabilidad": "Las tres producciones recurren a representaciones visuales de lo femenino, pero emplean diferentes estrategias discursivas, genéricas y enunciativas. Su análisis comparativo permitirá explorar continuidades, contrastes y rupturas en los modos de construir y cuestionar esas representaciones.",
     "imagenes": [
       {
         "id": "img1",
-        "archivo": "EJEMPLO-1.jpg",
-        "titulo": "EJEMPLO",
-        "autor": "EJEMPLO",
-        "anio": "EJEMPLO",
-        "soporte": "EJEMPLO (afiche, fotografía publicitaria, pintura…)",
-        "procedencia": "EJEMPLO (fuente, URL o archivo de origen)",
-        "textoAlternativo": "EJEMPLO — descripción breve para lectores de pantalla"
+        "archivo": "01_sherman_1978.jpg",
+        "titulo": "Untitled Film Still #21",
+        "autor": "Cindy Sherman",
+        "anio": "1978",
+        "soporte": "Fotografía en blanco y negro, copia en gelatina de plata",
+        "procedencia": "Museum of Modern Art (MoMA), Nueva York. https://www.moma.org/collection/works/56618/",
+        "textoAlternativo": "Fotografía en blanco y negro de una mujer con vestimenta formal, situada en un espacio urbano, con edificios de varios pisos al fondo."
       },
       {
         "id": "img2",
-        "archivo": "EJEMPLO-2.jpg",
-        "titulo": "EJEMPLO",
-        "autor": "EJEMPLO",
-        "anio": "EJEMPLO",
-        "soporte": "EJEMPLO (afiche, fotografía publicitaria, pintura…)",
-        "procedencia": "EJEMPLO (fuente, URL o archivo de origen)",
-        "textoAlternativo": "EJEMPLO — descripción breve para lectores de pantalla"
+        "archivo": "02_kruger_1989.jpg",
+        "titulo": "Untitled (Your body is a battleground)",
+        "autor": "Barbara Kruger",
+        "anio": "1989",
+        "soporte": "Serigrafía fotográfica sobre vinilo; imagen gráfica vinculada a la intervención política",
+        "procedencia": "The Broad, Los Ángeles. https://www.thebroad.org/art/barbara-kruger/untitled-your-body-battleground",
+        "textoAlternativo": "Representación frontal de un rostro femenino dividido en dos mitades con tratamientos tonales opuestos. Presenta textos en blanco sobre bandas rojas."
       },
       {
         "id": "img3",
-        "archivo": "EJEMPLO-3.jpg",
-        "titulo": "EJEMPLO",
-        "autor": "EJEMPLO",
-        "anio": "EJEMPLO",
-        "soporte": "EJEMPLO (afiche, fotografía publicitaria, pintura…)",
-        "procedencia": "EJEMPLO (fuente, URL o archivo de origen)",
-        "textoAlternativo": "EJEMPLO — descripción breve para lectores de pantalla"
+        "archivo": "03_guerrillagirls_1989.jpg",
+        "titulo": "Do Women Have to Be Naked to Get Into the Met. Museum?",
+        "autor": "Guerrilla Girls",
+        "anio": "1989",
+        "soporte": "Afiche, litografía offset",
+        "procedencia": "The Metropolitan Museum of Art, Nueva York. https://www.metmuseum.org/art/collection/search/849438",
+        "textoAlternativo": "Afiche horizontal con fondo amarillo, texto negro de gran tamaño y una figura femenina desnuda y reclinada con máscara de gorila."
       }
     ]
   }

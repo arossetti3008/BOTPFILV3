@@ -126,6 +126,33 @@ Generadas con `node scripts/probar-tutor.js`, con `gemini-3.5-flash-lite`. El co
 
 Cambio de diseño respecto de Nódos: el texto sobre el color de acento pasó a ser oscuro en el tema oscuro, y el acento del tema claro se oscureció un poco (`#b5523a`). Con los colores originales, el texto blanco sobre el coral no alcanzaba el contraste mínimo recomendado.
 
+## Materiales reales del docente (01/11/2026)
+
+Carpetas de Drive del docente: "Bibliografía LV 3" (6 PDFs, sin hoja `fuentes`) y "Corpus LV III" (subcarpeta "Corpus 1 — Representaciones de la feminidad": 3 JPG y un documento "ficha").
+
+**Corpus:** se cargó en `backend/contenidos/corpus/corpus.json` con los datos de la ficha, sin cambios. La "descripción visual breve" de cada imagen se usa como texto alternativo. La imagen de Guerrilla Girls se achicó de 1.816 KB a 183 KB. El servidor valida el corpus sin problemas.
+
+**Derechos de las imágenes:** el repositorio es público. El usuario decidió publicar las imágenes y que el docente verifique las condiciones de reproducción, como pide la ficha.
+
+**Bibliografía**, analizada con el mismo extractor de la app:
+
+| PDF | Páginas | Texto | Página impresa (deducida del PDF) |
+|---|---|---|---|
+| Matriz de análisis del discurso visual (cátedra) | 11 | Bien | Sin números de página |
+| Zecchetto (cap. 9) | 30 | Bien | La pág. 4 del PDF muestra "186" → `paginaInicial` 183 (verificar) |
+| Ciafardo (glosario) | 18 | Poco texto (1.733 palabras); algunas páginas con caracteres ilegibles | La pág. 2 del PDF es la 341 → 340 |
+| Giglietti | 29 | **Parte del texto sale ilegible** (14 % de caracteres raros; 14 páginas afectadas): problema de fuentes del PDF | 253, confirmado (el fragmento citado "p. 279" coincide con el encabezado "279") |
+| Oliveras (caps. 1, 10 y 11, OCR) | 37 | Legible con errores de OCR; la pág. 37 sin texto | Sin datos claros |
+| Anguio (OCR) | 8 | Bien | Escaneo de 2 páginas por hoja: no sirve `paginaInicial` |
+
+**Simulación de la sincronización** con los PDFs reales y el borrador `docs/fuentes-borrador.csv` (Drive simulado localmente, porque no hay cuenta de servicio): 5 fuentes, 125 páginas, 189 fragmentos, 39.680 palabras, **7,2 s**. Anguio se omite porque faltan sus datos en la hoja. Las búsquedas de prueba ("enunciador y enunciatario", "metáfora visual", "género del retrato") devuelven fragmentos pertinentes de la Matriz, Zecchetto, Giglietti y Oliveras.
+
+**Pendiente:**
+- Cuenta de servicio (la crea el docente) y la hoja `fuentes` en la carpeta (borrador en `docs/fuentes-borrador.csv`).
+- Completar los datos de Anguio y las referencias APA que faltan.
+- Mejorar el PDF de Giglietti (pasarlo por OCR resolvería el texto ilegible).
+- Sincronización real y una conversación con citas reales.
+
 ## Fuentes oficiales consultadas (01/11/2026)
 
 | Tema | URL | Dato usado |
