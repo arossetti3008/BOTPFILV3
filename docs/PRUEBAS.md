@@ -2,6 +2,26 @@
 
 Cada fila distingue qué está **implementado**, cómo fue **probado** y qué queda **pendiente**. "Test automático" significa `npm test` en `backend/` con Gemini simulado (no llama a Google).
 
+## Resumen al cierre (01/11/2026)
+
+- **Tests automáticos:** backend 67 de 67; frontend 16 de 16; `npm run build` sin errores.
+- **Desde cero (Etapa 6):** se clonó el repositorio de GitHub en una carpeta nueva y se siguió el README. `npm install`, los tests y el build pasaron. El servidor arrancó sin clave e informó con claridad lo que faltaba (`/api/health` en "incompleto"; el chat responde "El asistente todavía no está configurado…"). La app cargó.
+- **Publicada:** app en https://botpfilv-3.vercel.app y servidor en https://botpfilv3-backend.onrender.com. Se probó de punta a punta en un navegador: inicio, entrada como grupo, corpus con sus 3 imágenes y chat con Gemini real.
+- **Limpieza:** se eliminaron `referencia-nodos/`, `crear-estructura.mjs` y el README de la plantilla de Vite. Una búsqueda (`git grep`) no encontró restos de MongoDB, árbol de habilidades ni evaluación con IA. Quedan "JWT" (el método legítimo de autenticación con Google Drive), "Evaluación" (los criterios de la consigna y las tablas de las pruebas del tutor) y comentarios que indican qué piezas se tomaron de Nódos.
+
+### Lo que no se pudo probar en este entorno
+
+| Qué | Por qué | Cómo probarlo |
+|---|---|---|
+| Sincronización con la carpeta real de Drive | Falta la cuenta de servicio y la hoja `fuentes` (las hace el docente) | `/api/bibliografia` después de cargar la clave (instructivo, "¿Cómo sé si funcionó?") |
+| Citas de Gemini con la bibliografía real | Depende de lo anterior | `node scripts/probar-tutor.js` con la bibliografía activa, o una conversación en la app en la fase 2 |
+| Observaciones de Gemini sobre las imágenes reales del corpus | Las pruebas del tutor usaron imágenes de ejemplo | Pedir "observaciones sobre las imágenes" en la app publicada |
+| Celulares y tablets reales (táctil, teclado, ampliar imagen, aviso al cerrar) | Solo se probó con Edge emulando tamaños de 360 a 1280 px | Prueba del día anterior (guía docente, sección 5) |
+| Lectores de pantalla | Sin lector de pantalla en este entorno | Revisión con NVDA (Windows) o TalkBack (Android) |
+| Muchos grupos a la vez con la cuota real | No se quiso gastar la cuota | Lo cubren los topes configurados y el respaldo automático; vigilar `/api/health` (`cuota.usoHoy`) durante el taller |
+| Respaldo automático por cuota diaria agotada | No se puede forzar sin gastar los 500 pedidos | Cubierto por tests. El paso al respaldo por demora sí se vio con Gemini real (Etapa 3) |
+| Servidor "despertando" en Render | Depende del tiempo de inactividad | Abrir la app después de más de 15 minutos sin uso |
+
 ## Etapa 1 — Backend base (01/11/2026)
 
 `npm test`: **38 tests, 38 pasan** (Node 22.21, Windows 11).
