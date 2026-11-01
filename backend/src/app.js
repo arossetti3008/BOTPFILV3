@@ -15,13 +15,15 @@ const { crearLimiteGlobalPorIp } = require('./middleware/limites');
 const { crearRutasChat } = require('./routes/chatRoutes');
 const { crearRutasTaller } = require('./routes/tallerRoutes');
 const { crearRutasBibliografia } = require('./routes/bibliografiaRoutes');
+const { crearRutasContenidos } = require('./routes/contenidosRoutes');
 const { manejadorErrores, rutaNoEncontrada } = require('./middleware/errorHandler');
 
 // fetchImpl reemplaza las llamadas a Gemini y fetchDrive las de Google Drive
-// (los tests usan versiones simuladas de ambos)
-function crearApp({ config, fetchImpl, fetchDrive, esperar } = {}) {
+// (los tests usan versiones simuladas de ambos). carpetaCorpus permite usar
+// otro corpus (lo usa scripts/probar-tutor.js).
+function crearApp({ config, fetchImpl, fetchDrive, esperar, carpetaCorpus } = {}) {
   const taller = cargarTaller();
-  const corpusService = cargarCorpus();
+  const corpusService = cargarCorpus(carpetaCorpus);
 
   const drive = config.drive.configurada
     ? crearServicioDrive({ credenciales: config.drive.credenciales, folderId: config.drive.folderId, fetchImpl: fetchDrive })
@@ -66,6 +68,7 @@ function crearApp({ config, fetchImpl, fetchDrive, esperar } = {}) {
 
   app.use('/api', crearRutasTaller({ config, taller }));
   app.use('/api', crearRutasBibliografia({ config, bibliografia }));
+  app.use('/api', crearRutasContenidos({ corpusService }));
   app.use('/api/chat', crearRutasChat({ config, taller, corpusService, gemini, bibliografia }));
   app.use('/imagenes', express.static(corpusService.carpetaImagenes, { maxAge: '1h', index: false }));
 

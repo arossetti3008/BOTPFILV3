@@ -1,7 +1,8 @@
 // Carga y valida contenidos/corpus/corpus.json.
-// Regla: cada corpus tiene exactamente 3 imágenes. Un corpus inválido no se
-// ofrece a los grupos y el problema se informa en el log y en /api/health.
-// (Los endpoints públicos de corpus se agregan en la Etapa 3.)
+// Reglas: cada corpus tiene exactamente 3 imágenes, con los campos de su
+// ficha, y cada archivo existe en contenidos/corpus/imagenes en un formato
+// que Gemini acepta. Un corpus inválido no se ofrece a los grupos; el
+// problema se informa en el log y en /api/health.
 
 const fs = require('node:fs');
 const path = require('node:path');
@@ -9,6 +10,8 @@ const path = require('node:path');
 const CARPETA_CORPUS = path.join(__dirname, '..', '..', 'contenidos', 'corpus');
 const CAMPOS_CORPUS = ['id', 'titulo', 'problematica', 'ejeComparabilidad'];
 const CAMPOS_IMAGEN = ['id', 'archivo', 'titulo', 'textoAlternativo'];
+const TIPOS_IMAGEN = { '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp' };
+const PESO_RECOMENDADO = 500 * 1024;
 
 function validarCorpus(corpus, posicion) {
   const errores = [];
@@ -35,7 +38,49 @@ function validarCorpus(corpus, posicion) {
   return errores;
 }
 
+// Revisa que cada archivo exista, que sea de un tipo que Gemini acepta y
+// que no sea demasiado pesado (se ve desde celulares y viaja a Gemini)
+function revisarArchivos(corpus, carpetaImagenes) {
+  const errores = [];
+  const avisos = [];
+  for (const imagen of corpus.imagenes) {
+    const extension = path.extname(imagen.archivo).toLowerCase();
+    const ruta = path.join(carpetaImagenes, path.basename(imagen.archivo));
+    if (!TIPOS_IMAGEN[extension]) {
+      errores.push(`Corpus "${corpus.id}": "${imagen.archivo}" tiene que ser JPG, PNG o WEBP.`);
+    } else if (!fs.existsSync(ruta)) {
+      errores.push(`Corpus "${corpus.id}": no se encontró el archivo "${imagen.archivo}" en contenidos/corpus/imagenes.`);
+    } else if (fs.statSync(ruta).size > PESO_RECOMENDADO) {
+      avisos.push(
+        `Corpus "${corpus.id}": "${imagen.archivo}" pesa más de 500 KB; conviene achicarla (1600 px de lado como máximo).`
+      );
+    }
+  }
+  return { errores, avisos };
+}
+
+// Lo que ve el navegador: sin rutas internas del servidor
+function versionPublica(corpus) {
+  return {
+    id: corpus.id,
+    titulo: corpus.titulo,
+    problematica: corpus.problematica,
+    ejeComparabilidad: corpus.ejeComparabilidad,
+    imagenes: corpus.imagenes.map((imagen) => ({
+      id: imagen.id,
+      url: `/imagenes/${encodeURIComponent(path.basename(imagen.archivo))}`,
+      titulo: imagen.titulo,
+      autor: imagen.autor || '',
+      anio: imagen.anio || '',
+      soporte: imagen.soporte || '',
+      procedencia: imagen.procedencia || '',
+      textoAlternativo: imagen.textoAlternativo,
+    })),
+  };
+}
+
 function cargarCorpus(carpeta = CARPETA_CORPUS) {
+  const carpetaImagenes = path.join(carpeta, 'imagenes');
   const problemas = [];
   let lista = [];
   try {
@@ -50,6 +95,11 @@ function cargarCorpus(carpeta = CARPETA_CORPUS) {
   lista.forEach((corpus, i) => {
     const errores = validarCorpus(corpus, i);
     if (validos.has(corpus?.id)) errores.push(`Corpus "${corpus.id}": el id está repetido.`);
+    if (!errores.length) {
+      const revision = revisarArchivos(corpus, carpetaImagenes);
+      errores.push(...revision.errores);
+      problemas.push(...revision.avisos);
+    }
     if (errores.length) {
       problemas.push(...errores);
       return;
@@ -60,11 +110,25 @@ function cargarCorpus(carpeta = CARPETA_CORPUS) {
   if (validos.size === 0) problemas.push('No hay ningún corpus válido para ofrecer a los grupos.');
   problemas.forEach((p) => console.error('[corpus]', p));
 
+  // Las 3 imágenes como inline_data para Gemini (base64), leídas del disco
+  function imagenesParaGemini(corpus) {
+    return corpus.imagenes.map((imagen) => {
+      const archivo = path.basename(imagen.archivo);
+      return {
+        titulo: imagen.titulo,
+        mimeType: TIPOS_IMAGEN[path.extname(archivo).toLowerCase()],
+        datos: fs.readFileSync(path.join(carpetaImagenes, archivo)).toString('base64'),
+      };
+    });
+  }
+
   return {
-    carpetaImagenes: path.join(carpeta, 'imagenes'),
+    carpetaImagenes,
     problemas,
     listar: () => [...validos.values()],
     obtener: (id) => validos.get(id) || null,
+    versionPublica,
+    imagenesParaGemini,
   };
 }
 

@@ -1,0 +1,53 @@
+{
+  "fuente": "Consigna del Trabajo Final Integrador, Lenguaje Visual III (2025). El docente puede editar este archivo.",
+  "dimensiones": [
+    {
+      "id": "genero-estilo",
+      "nombre": "Género y estilo",
+      "descripcion": "Clasificación de los discursos según sus características genéricas y estilísticas.",
+      "preguntasGuia": [
+        "¿Cómo se clasifican estos discursos según sus características genéricas y estilísticas?"
+      ]
+    },
+    {
+      "id": "retorico",
+      "nombre": "Nivel retórico",
+      "descripcion": "Describan la configuración visual / audiovisual y analicen los efectos de sentido que genera. Identifiquen las principales figuras retóricas, atendiendo a la naturaleza de la operación y la relación entre los elementos.",
+      "preguntasGuia": [
+        "¿Cómo está configurada visualmente cada imagen y qué efectos de sentido genera?",
+        "¿Cuáles son las principales figuras retóricas? ¿Cuál es la naturaleza de la operación y qué relación se establece entre los elementos?"
+      ]
+    },
+    {
+      "id": "tematico",
+      "nombre": "Nivel temático",
+      "descripcion": "Qué muestran las imágenes, de qué hablan, qué imagen del mundo construyen y cómo se articulan motivos y temas.",
+      "preguntasGuia": [
+        "¿Qué nos muestran las imágenes?",
+        "¿De qué nos hablan?",
+        "¿Qué imagen del mundo construyen?",
+        "¿Cómo se articulan motivos y temas en el discurso?"
+      ]
+    },
+    {
+      "id": "enunciativo",
+      "nombre": "Nivel enunciativo",
+      "descripcion": "A partir de los rasgos temáticos y retóricos: figuras de enunciador y enunciatario, estrategias enunciativas, tipo de relación que se establece y marcas que la justifican.",
+      "preguntasGuia": [
+        "¿Cómo son las figuras de enunciador y enunciatario?",
+        "¿Qué estrategias enunciativas son puestas en juego?",
+        "¿Qué tipo de relación se establece entre enunciador y destinatario? (Simetría, complementariedad, complicidad, distancia, ironía, pedagogía, etc.)",
+        "¿Cuáles son las marcas que posibilitan justificar esa relación?"
+      ]
+    },
+    {
+      "id": "comparativo",
+      "nombre": "Análisis comparativo",
+      "descripcion": "Poner las piezas en diálogo según el eje de comparabilidad, para encontrar contrastes, continuidades o rupturas.",
+      "preguntasGuia": [
+        "¿Qué contrastes, continuidades o rupturas encuentran entre los tres discursos?",
+        "¿Qué relaciones encuentran entre los tres discursos a partir del eje de comparación?"
+      ]
+    }
+  ]
+}

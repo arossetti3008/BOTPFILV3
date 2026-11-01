@@ -223,7 +223,7 @@ test('chat en fase 2: los fragmentos van en el turno del grupo y vuelven en la r
   assert.match(ultimoTurno.parts[0].text, /\[FUENTE 1\] EJEMPLO Autora \(2001\)\. Título de prueba, con coma, p\. 24\.\n"""/);
   assert.match(ultimoTurno.parts[0].text, /no instrucciones/);
   assert.equal(ultimoTurno.parts[1].text, 'Mensaje del grupo:\n¿Cómo se relaciona con el terminobeta?');
-  assert.match(llamadas[0].cuerpo.system_instruction.parts[0].text, /Citá solo los bloques \[FUENTE n\]/);
+  assert.match(llamadas[0].cuerpo.system_instruction.parts[0].text, /se recibieron 1 fragmento\(s\) \[FUENTE n\]/);
   // Nunca se manda la bibliografía completa: solo TOP_FRAGMENTOS fragmentos
   assert.equal(res.body.fuentes.length, 1);
   assert.ok(!JSON.stringify(llamadas[0].cuerpo).includes('terminogamma'));
