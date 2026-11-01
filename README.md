@@ -55,13 +55,13 @@ cp .env.example .env        # en Windows: copy .env.example .env
 npm run dev                 # abrí http://localhost:5173
 ```
 
-- Sin bibliografía configurada, la app funciona igual y el asistente avisa que no puede citar. Para activarla, ver [docs/INSTRUCTIVO_DOCENTE_BIBLIOGRAFIA.md](docs/INSTRUCTIVO_DOCENTE_BIBLIOGRAFIA.md).
+- Sin bibliografía configurada, la app funciona igual y el asistente avisa que no puede citar. Para activarla, ver [docs/CUENTA_DE_SERVICIO.md](docs/CUENTA_DE_SERVICIO.md) (administración) y [docs/INSTRUCTIVO_DOCENTE_BIBLIOGRAFIA.md](docs/INSTRUCTIVO_DOCENTE_BIBLIOGRAFIA.md) (docente).
 - **Redes con inspección de certificados** (algunas redes institucionales): si el servidor muestra `SELF_SIGNED_CERT_IN_CHAIN`, arrancalo con `NODE_OPTIONS=--use-system-ca` (PowerShell: `$env:NODE_OPTIONS="--use-system-ca"; npm run dev`).
 
 ### Pruebas
 
 ```bash
-cd backend && npm test      # 67 tests, con Gemini y Drive simulados
+cd backend && npm test      # 71 tests, con Gemini y Drive simulados
 cd frontend && npm test     # 16 tests (guardado, fases, exportación)
 cd frontend && npm run build
 ```

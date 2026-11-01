@@ -4,7 +4,7 @@ Cada fila distingue qué está **implementado**, cómo fue **probado** y qué qu
 
 ## Resumen al cierre (01/11/2026)
 
-- **Tests automáticos:** backend 67 de 67; frontend 16 de 16; `npm run build` sin errores.
+- **Tests automáticos:** backend 71 de 71; frontend 16 de 16; `npm run build` sin errores.
 - **Desde cero (Etapa 6):** se clonó el repositorio de GitHub en una carpeta nueva y se siguió el README. `npm install`, los tests y el build pasaron. El servidor arrancó sin clave e informó con claridad lo que faltaba (`/api/health` en "incompleto"; el chat responde "El asistente todavía no está configurado…"). La app cargó.
 - **Publicada:** app en https://botpfilv-3.vercel.app y servidor en https://botpfilv3-backend.onrender.com. Se probó de punta a punta en un navegador: inicio, entrada como grupo, corpus con sus 3 imágenes y chat con Gemini real.
 - **Limpieza:** se eliminaron `referencia-nodos/`, `crear-estructura.mjs` y el README de la plantilla de Vite. Una búsqueda (`git grep`) no encontró restos de MongoDB, árbol de habilidades ni evaluación con IA. Quedan "JWT" (el método legítimo de autenticación con Google Drive), "Evaluación" (los criterios de la consigna y las tablas de las pruebas del tutor) y comentarios que indican qué piezas se tomaron de Nódos.
@@ -181,10 +181,10 @@ Carpetas de Drive del docente: "Bibliografía LV 3" (6 PDFs, sin hoja `fuentes`)
 | Oliveras (caps. 1, 10 y 11, OCR) | 37 | Legible con errores de OCR; la pág. 37 sin texto | Sin datos claros |
 | Anguio (OCR) | 8 | Bien | Escaneo de 2 páginas por hoja: no sirve `paginaInicial` |
 
-**Simulación de la sincronización** con los PDFs reales y el borrador `docs/fuentes-borrador.csv` (Drive simulado localmente, porque no hay cuenta de servicio): 5 fuentes, 125 páginas, 189 fragmentos, 39.680 palabras, **7,2 s**. Anguio se omite porque faltan sus datos en la hoja. Las búsquedas de prueba ("enunciador y enunciatario", "metáfora visual", "género del retrato") devuelven fragmentos pertinentes de la Matriz, Zecchetto, Giglietti y Oliveras.
+**Simulación de la sincronización** con los PDFs reales y el borrador de los datos de las fuentes (hoy `backend/contenidos/fuentes.csv`) (Drive simulado localmente, porque no hay cuenta de servicio): 5 fuentes, 125 páginas, 189 fragmentos, 39.680 palabras, **7,2 s**. Anguio se omite porque faltan sus datos en la hoja. Las búsquedas de prueba ("enunciador y enunciatario", "metáfora visual", "género del retrato") devuelven fragmentos pertinentes de la Matriz, Zecchetto, Giglietti y Oliveras.
 
 **Pendiente:**
-- Cuenta de servicio (la crea el docente) y la hoja `fuentes` en la carpeta (borrador en `docs/fuentes-borrador.csv`).
+- Cuenta de servicio (la crea quien administra la app, ver `docs/CUENTA_DE_SERVICIO.md`) y la carpeta compartida por el docente. Los datos de las fuentes están en `backend/contenidos/fuentes.csv`.
 - Completar los datos de Anguio y las referencias APA que faltan.
 - Mejorar el PDF de Giglietti (pasarlo por OCR resolvería el texto ilegible).
 - Sincronización real y una conversación con citas reales.

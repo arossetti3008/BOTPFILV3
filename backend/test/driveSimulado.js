@@ -23,6 +23,8 @@ const TIPOS = {
   pdf: 'application/pdf',
   doc: 'application/vnd.google-apps.document',
   hoja: 'application/vnd.google-apps.spreadsheet',
+  carpeta: 'application/vnd.google-apps.folder',
+  acceso: 'application/vnd.google-apps.shortcut',
 };
 
 function credencialesBase64(credenciales = CREDENCIALES) {
@@ -108,8 +110,13 @@ function crearDriveSimulado(archivos = archivosDePrueba()) {
     if (opciones.headers?.Authorization !== 'Bearer token-simulado') return new Response('{}', { status: 401 });
 
     if (direccion.pathname === '/drive/v3/files') {
-      if (!direccion.searchParams.get('q').includes(`'${FOLDER_ID}' in parents`)) return new Response('{}', { status: 404 });
-      return Response.json({ files: archivos.map(({ contenido, ...meta }) => meta) });
+      // Lista los hijos de la carpeta pedida ("padre" vacío = carpeta compartida)
+      const padre = (direccion.searchParams.get('q').match(/^'([^']+)' in parents/) || [])[1];
+      const conocida = padre === FOLDER_ID || archivos.some((a) => a.id === padre && a.mimeType === TIPOS.carpeta);
+      if (!conocida) return new Response('{}', { status: 404 });
+      return Response.json({
+        files: archivos.filter((a) => (a.padre || FOLDER_ID) === padre).map(({ contenido, padre: _p, ...meta }) => meta),
+      });
     }
 
     const partes = direccion.pathname.match(/^\/drive\/v3\/files\/([^/]+)(\/export)?$/);

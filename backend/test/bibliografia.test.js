@@ -13,10 +13,11 @@ const { leerCsvConEncabezados } = require('../src/utils/csv');
 
 h.silenciarConsola();
 
-function bibliografiaDePrueba(archivos) {
+// leerFuentesLocales: por defecto ninguno, para no depender de contenidos/fuentes.csv
+function bibliografiaDePrueba(archivos, { leerFuentesLocales = () => null } = {}) {
   const simulado = d.crearDriveSimulado(archivos);
   const drive = crearServicioDrive({ credenciales: d.CREDENCIALES, folderId: d.FOLDER_ID, fetchImpl: simulado.fetchDrive });
-  return { bibliografia: crearServicioBibliografia({ drive }), simulado };
+  return { bibliografia: crearServicioBibliografia({ drive, leerFuentesLocales }), simulado };
 }
 
 function appConDrive({ env = {}, respuestas, archivos } = {}) {
@@ -114,6 +115,59 @@ test('hoja "fuentes" sin las columnas exactas: error claro', async () => {
   const { bibliografia } = bibliografiaDePrueba(archivos);
   await assert.rejects(bibliografia.sincronizar(), /le faltan columnas: anio, referenciaAPA, paginaInicial, dimensiones, corpus/);
   assert.equal(bibliografia.estadoParaSalud().estado, 'error');
+});
+
+test('PDF en subcarpetas y accesos directos de Drive: se indexan igual', async () => {
+  const archivos = d.archivosDePrueba();
+  const pdf = archivos.find((a) => a.id === 'pdf1');
+  const doc = archivos.find((a) => a.id === 'doc1');
+  // El PDF pasa a una subcarpeta de otra subcarpeta; el Doc queda fuera y se
+  // agrega un acceso directo que apunta a él
+  archivos.push(
+    { id: 'sub1', name: 'Eje 1', mimeType: d.TIPOS.carpeta, modifiedTime: '1' },
+    { id: 'sub2', name: 'Capítulos', mimeType: d.TIPOS.carpeta, modifiedTime: '1', padre: 'sub1' },
+    {
+      id: 'acc1',
+      name: 'Documento de prueba',
+      mimeType: d.TIPOS.acceso,
+      modifiedTime: '1',
+      shortcutDetails: { targetId: 'doc1', targetMimeType: d.TIPOS.doc },
+    }
+  );
+  pdf.padre = 'sub2';
+  doc.padre = 'otra-carpeta-no-compartida';
+  const { bibliografia } = bibliografiaDePrueba(archivos);
+  const reporte = await bibliografia.sincronizar();
+  assert.equal(reporte.fuentes, 2);
+  assert.equal(bibliografia.buscar('terminobeta')[0].pagina, 'p. 24');
+  assert.equal(bibliografia.buscar('terminodelta')[0].fuente.archivo, 'Documento de prueba');
+});
+
+test('sin hoja "fuentes" en Drive: usa contenidos/fuentes.csv del proyecto', async () => {
+  const archivos = d.archivosDePrueba();
+  const csv = archivos.shift().contenido; // se saca la hoja de la carpeta
+  const { bibliografia } = bibliografiaDePrueba(archivos, { leerFuentesLocales: () => csv });
+  const reporte = await bibliografia.sincronizar();
+  assert.equal(reporte.fuentes, 2);
+  assert.match(reporte.datosDeLasFuentes, /contenidos\/fuentes\.csv/);
+  assert.match(reporte.advertencias.join('\n'), /La fila "No existe.pdf" de archivo del proyecto/);
+});
+
+test('sin hoja en Drive ni archivo en el proyecto: error claro', async () => {
+  const archivos = d.archivosDePrueba().slice(1);
+  const { bibliografia } = bibliografiaDePrueba(archivos);
+  await assert.rejects(bibliografia.sincronizar(), /falta la hoja "fuentes" en la carpeta de Drive y el archivo contenidos\/fuentes\.csv/);
+});
+
+test('dos PDF con el mismo nombre en distintas subcarpetas: avisa y usa uno', async () => {
+  const archivos = d.archivosDePrueba();
+  archivos.push(
+    { id: 'sub1', name: 'Copias', mimeType: d.TIPOS.carpeta, modifiedTime: '1' },
+    { ...archivos.find((a) => a.id === 'pdf1'), id: 'pdf1-copia', padre: 'sub1' }
+  );
+  const { bibliografia } = bibliografiaDePrueba(archivos);
+  const reporte = await bibliografia.sincronizar();
+  assert.match(reporte.advertencias.join('\n'), /Hay dos archivos llamados "Capitulo de prueba.pdf" \(en Copias\/\)/);
 });
 
 test('fila con datos faltantes: se omite y se avisa (nunca se inventan metadatos)', async () => {

@@ -9,6 +9,9 @@ const crypto = require('node:crypto');
 const URL_DRIVE = 'https://www.googleapis.com/drive/v3';
 const ALCANCE = 'https://www.googleapis.com/auth/drive.readonly';
 const URL_TOKEN_POR_DEFECTO = 'https://oauth2.googleapis.com/token';
+const TIPO_CARPETA = 'application/vnd.google-apps.folder';
+const TIPO_ACCESO_DIRECTO = 'application/vnd.google-apps.shortcut';
+const MAX_NIVELES = 3; // carpeta → subcarpeta → sub-subcarpeta → ...
 
 function base64url(datos) {
   return Buffer.from(datos).toString('base64').replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_');
@@ -93,14 +96,14 @@ function crearServicioDrive({ credenciales, folderId, fetchImpl, ahora = () => D
     throw errorDrive(`Error de Google Drive (${respuesta.status}).`, detalle);
   }
 
-  // Lista los archivos de la carpeta (sin los que están en la papelera)
-  async function listarCarpeta() {
+  // Lista los archivos de una carpeta, sin entrar en subcarpetas (sin papelera)
+  async function listarHijos(carpetaId) {
     const archivos = [];
     let pagina = '';
     do {
       const parametros = new URLSearchParams({
-        q: `'${folderId}' in parents and trashed = false`,
-        fields: 'nextPageToken, files(id, name, mimeType, modifiedTime)',
+        q: `'${carpetaId}' in parents and trashed = false`,
+        fields: 'nextPageToken, files(id, name, mimeType, modifiedTime, shortcutDetails)',
         pageSize: '200',
         supportsAllDrives: 'true',
         includeItemsFromAllDrives: 'true',
@@ -110,6 +113,40 @@ function crearServicioDrive({ credenciales, folderId, fetchImpl, ahora = () => D
       archivos.push(...(datos.files || []));
       pagina = datos.nextPageToken || '';
     } while (pagina);
+    return archivos;
+  }
+
+  // Lista todos los archivos de la carpeta compartida y de sus subcarpetas
+  // (hasta MAX_NIVELES de profundidad). Los accesos directos de Drive se
+  // reemplazan por el archivo al que apuntan. Cada archivo lleva "carpeta"
+  // con la ruta relativa donde está (para los mensajes del reporte).
+  async function listarCarpeta() {
+    const archivos = [];
+    const pendientes = [{ id: folderId, ruta: '', nivel: 0 }];
+    const visitadas = new Set();
+    while (pendientes.length) {
+      const actual = pendientes.shift();
+      if (visitadas.has(actual.id)) continue;
+      visitadas.add(actual.id);
+      for (const item of await listarHijos(actual.id)) {
+        let archivo = item;
+        if (item.mimeType === TIPO_ACCESO_DIRECTO && item.shortcutDetails?.targetId) {
+          archivo = {
+            ...item,
+            id: item.shortcutDetails.targetId,
+            mimeType: item.shortcutDetails.targetMimeType,
+            accesoDirecto: true,
+          };
+        }
+        if (archivo.mimeType === TIPO_CARPETA) {
+          if (actual.nivel < MAX_NIVELES) {
+            pendientes.push({ id: archivo.id, ruta: `${actual.ruta}${archivo.name}/`, nivel: actual.nivel + 1 });
+          }
+          continue;
+        }
+        archivos.push({ ...archivo, carpeta: actual.ruta });
+      }
+    }
     return archivos;
   }
 

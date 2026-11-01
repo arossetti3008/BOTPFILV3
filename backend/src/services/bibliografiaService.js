@@ -5,7 +5,14 @@
 // Sincronización: al iniciar y cada DRIVE_RESYNC_MINUTOS (solo si cambió
 // algún archivo), o forzada con POST /api/admin/sincronizar.
 // Si Drive falla se conserva el último índice válido.
+//
+// Datos de cada fuente (autor, año, título, página): se toman de la hoja
+// "fuentes" de la carpeta de Drive si existe; si no, del archivo del proyecto
+// backend/contenidos/fuentes.csv (mismas columnas). Los PDF pueden estar en
+// subcarpetas.
 
+const fs = require('node:fs');
+const path = require('node:path');
 const { leerCsvConEncabezados } = require('../utils/csv');
 const { tokenizar, contarPalabras } = require('../utils/texto');
 const { extraerPaginasPdf } = require('../utils/pdf');
@@ -15,6 +22,16 @@ const TIPO_DOC = 'application/vnd.google-apps.document';
 const TIPO_HOJA = 'application/vnd.google-apps.spreadsheet';
 const TIPO_CARPETA = 'application/vnd.google-apps.folder';
 const COLUMNAS = ['archivo', 'autor', 'anio', 'titulo', 'referenciaAPA', 'paginaInicial', 'dimensiones', 'corpus'];
+const RUTA_FUENTES_LOCAL = path.join(__dirname, '..', '..', 'contenidos', 'fuentes.csv');
+
+// Devuelve el texto de contenidos/fuentes.csv, o null si no existe
+function leerFuentesLocalesPorDefecto() {
+  try {
+    return fs.readFileSync(RUTA_FUENTES_LOCAL, 'utf8');
+  } catch {
+    return null;
+  }
+}
 
 const MAX_PALABRAS_FRAGMENTO = 350;
 const MIN_PALABRAS_PAGINA = 5; // menos que esto se considera "página sin texto"
@@ -61,7 +78,12 @@ function construirIndice(fragmentos) {
   return { frecuenciaDocumental, largoPromedio: fragmentos.length ? largoTotal / fragmentos.length : 0 };
 }
 
-function crearServicioBibliografia({ drive, extraerPaginas = extraerPaginasPdf, ahora = () => Date.now() }) {
+function crearServicioBibliografia({
+  drive,
+  extraerPaginas = extraerPaginasPdf,
+  ahora = () => Date.now(),
+  leerFuentesLocales = leerFuentesLocalesPorDefecto,
+}) {
   let indice = null; // { fuentes, fragmentos, bm25 }
   let firmaCarpeta = null; // id:modifiedTime de todos los archivos, para detectar cambios
   let enCurso = null;
@@ -75,15 +97,29 @@ function crearServicioBibliografia({ drive, extraerPaginas = extraerPaginasPdf, 
     error: null,
   };
 
-  async function leerHojaFuentes(hoja) {
-    const contenido =
-      hoja.mimeType === TIPO_HOJA ? await drive.exportar(hoja.id, 'text/csv') : await drive.descargar(hoja.id);
-    const { columnas, registros } = leerCsvConEncabezados(contenido.toString('utf8'));
+  function validarFilas(textoCsv, origen) {
+    const { columnas, registros } = leerCsvConEncabezados(textoCsv);
     const faltantes = COLUMNAS.filter((c) => !columnas.includes(c));
     if (faltantes.length) {
-      throw new Error(`A la hoja "fuentes" le faltan columnas: ${faltantes.join(', ')}. Tienen que ser exactamente: ${COLUMNAS.join(', ')}.`);
+      throw new Error(`A ${origen} le faltan columnas: ${faltantes.join(', ')}. Tienen que ser exactamente: ${COLUMNAS.join(', ')}.`);
     }
     return registros;
+  }
+
+  // Datos de las fuentes: hoja "fuentes" de Drive o, si no hay, el archivo del proyecto
+  async function leerDatosFuentes(hoja) {
+    if (hoja) {
+      const contenido =
+        hoja.mimeType === TIPO_HOJA ? await drive.exportar(hoja.id, 'text/csv') : await drive.descargar(hoja.id);
+      return { filas: validarFilas(contenido.toString('utf8'), 'la hoja "fuentes"'), origen: 'hoja "fuentes" de Drive' };
+    }
+    const local = leerFuentesLocales();
+    if (local) {
+      return { filas: validarFilas(local, 'contenidos/fuentes.csv'), origen: 'archivo del proyecto contenidos/fuentes.csv' };
+    }
+    throw new Error(
+      'No se encontraron los datos de las fuentes: falta la hoja "fuentes" en la carpeta de Drive y el archivo contenidos/fuentes.csv.'
+    );
   }
 
   async function obtenerPaginas(documento) {
@@ -113,15 +149,23 @@ function crearServicioBibliografia({ drive, extraerPaginas = extraerPaginasPdf, 
       }
 
       const advertencias = [];
-      const hoja = archivos.find((a) => ['fuentes', 'fuentes.csv'].includes(a.name.trim().toLowerCase()));
-      if (!hoja) throw new Error('No se encontró la hoja "fuentes" en la carpeta de Drive.');
-      const filas = await leerHojaFuentes(hoja);
+      const hoja = archivos.find((a) => ['fuentes', 'fuentes.csv'].includes(a.name.trim().toLowerCase())) || null;
+      const { filas, origen } = await leerDatosFuentes(hoja);
 
       const documentos = new Map();
       for (const archivo of archivos) {
         if (archivo === hoja || archivo.mimeType === TIPO_CARPETA) continue;
-        if (archivo.mimeType === TIPO_PDF || archivo.mimeType === TIPO_DOC) documentos.set(archivo.name.trim(), archivo);
-        else advertencias.push(`Se ignora "${archivo.name}": solo se aceptan PDF y Google Docs.`);
+        const ubicacion = archivo.carpeta ? ` (en ${archivo.carpeta})` : '';
+        if (archivo.mimeType !== TIPO_PDF && archivo.mimeType !== TIPO_DOC) {
+          advertencias.push(`Se ignora "${archivo.name}"${ubicacion}: solo se aceptan PDF y Google Docs.`);
+          continue;
+        }
+        const nombre = archivo.name.trim();
+        if (documentos.has(nombre)) {
+          advertencias.push(`Hay dos archivos llamados "${nombre}"${ubicacion}: se usa solo el primero. Cambiale el nombre a uno.`);
+          continue;
+        }
+        documentos.set(nombre, archivo);
       }
 
       const fuentes = [];
@@ -135,7 +179,7 @@ function crearServicioBibliografia({ drive, extraerPaginas = extraerPaginasPdf, 
         const nombre = fila.archivo;
         const documento = documentos.get(nombre);
         if (!documento) {
-          advertencias.push(`La fila "${nombre}" de la hoja "fuentes" no tiene archivo en la carpeta: se omite.`);
+          advertencias.push(`La fila "${nombre}" de ${origen} no tiene archivo en la carpeta: se omite.`);
           continue;
         }
         usados.add(nombre);
@@ -187,7 +231,7 @@ function crearServicioBibliografia({ drive, extraerPaginas = extraerPaginasPdf, 
       }
 
       for (const nombre of documentos.keys()) {
-        if (!usados.has(nombre)) advertencias.push(`El archivo "${nombre}" no tiene fila en la hoja "fuentes": se omite.`);
+        if (!usados.has(nombre)) advertencias.push(`El archivo "${nombre}" no tiene fila en ${origen}: se omite.`);
       }
       // Se descarta de la memoria lo que ya no está en la carpeta
       const idsActuales = new Set(archivos.map((a) => a.id));
@@ -199,6 +243,7 @@ function crearServicioBibliografia({ drive, extraerPaginas = extraerPaginasPdf, 
       const reporte = {
         fecha: new Date(ahora()).toISOString(),
         duracionMs: ahora() - inicio,
+        datosDeLasFuentes: origen,
         fuentes: fuentes.length,
         paginas: paginasTotales,
         paginasSinTexto,

@@ -11,9 +11,10 @@ Todo lo que hace falta para preparar y usar la aplicación en los talleres. No h
 
 | Material | Dónde va | Estado al 01/11/2026 |
 |---|---|---|
-| PDFs de la bibliografía, con texto seleccionable | Carpeta de Drive "Bibliografía LV 3" | ✅ 6 PDFs. Giglietti tiene páginas ilegibles: conviene pasarlo por OCR. |
-| Hoja `fuentes` con los datos de cada PDF | La misma carpeta | ⏳ Falta. Hay un borrador listo (instructivo, paso 3). |
-| Cuenta de servicio y carpeta compartida con ella | Google Cloud y Drive | ⏳ Falta ([instructivo](INSTRUCTIVO_DOCENTE_BIBLIOGRAFIA.md), pasos 1, 2 y 4). |
+| PDFs de la bibliografía, con texto seleccionable (pueden ir en subcarpetas) | Carpeta de Drive del docente | ⏳ El docente está reorganizando la carpeta. Giglietti tiene páginas ilegibles: conviene pasarlo por OCR. |
+| Carpeta compartida con la cuenta de servicio | Drive | ⏳ Falta ([instructivo para el docente](INSTRUCTIVO_DOCENTE_BIBLIOGRAFIA.md)). |
+| Datos de cada PDF (autor, año, título, referencia APA, página inicial) | `backend/contenidos/fuentes.csv` (los carga quien administra la app) | ⏳ Faltan los datos de Anguio y las referencias APA de Ciafardo, Giglietti y Oliveras. |
+| Cuenta de servicio | Google Cloud (la crea quien administra la app) | ⏳ Falta ([guía](CUENTA_DE_SERVICIO.md)). |
 | Corpus: problemática, eje y 3 imágenes con su ficha | `backend/contenidos/corpus/` | ✅ Corpus 1, "Representaciones de la feminidad". |
 | Texto final del aviso de IA y privacidad | `backend/contenidos/taller.json` | ⏳ Borrador: el docente lo confirma (sección 4). |
 | Instrucciones de entrega de evidencias | `backend/contenidos/entrega-evidencias.md` | ⏳ Dice "EJEMPLO": hay que completarlo (sección 4). |
@@ -23,9 +24,10 @@ Todo lo que hace falta para preparar y usar la aplicación en los talleres. No h
 
 ## 2. Bibliografía (Google Drive)
 
-El paso a paso completo, pensado para quien no tiene experiencia técnica, está en **[INSTRUCTIVO_DOCENTE_BIBLIOGRAFIA.md](INSTRUCTIVO_DOCENTE_BIBLIOGRAFIA.md)**: cuenta de servicio, compartir la carpeta, hoja `fuentes`, envío seguro de la clave y PDFs escaneados.
+- **El docente:** arma la carpeta (puede usar subcarpetas) y la comparte con la cuenta de servicio → **[INSTRUCTIVO_DOCENTE_BIBLIOGRAFIA.md](INSTRUCTIVO_DOCENTE_BIBLIOGRAFIA.md)**.
+- **Quien administra la app:** crea la cuenta de servicio, la carga en Render y mantiene los datos de cada PDF en `backend/contenidos/fuentes.csv` → **[CUENTA_DE_SERVICIO.md](CUENTA_DE_SERVICIO.md)**.
 
-**Actualizar la bibliografía más adelante:** subí el PDF a la carpeta, agregá su fila en la hoja `fuentes` y esperá hasta 30 minutos. No hace falta tocar código ni volver a publicar la app.
+**Actualizar la bibliografía más adelante:** el docente sube el PDF a la carpeta y le pasa sus datos a quien administra la app, que agrega la fila en `fuentes.csv`. La carpeta se revisa sola cada 30 minutos. Si un PDF se reemplaza por otro con el mismo nombre, no hace falta tocar nada.
 
 **Forzar la actualización al instante.** Lo hace quien administra la app:
 
@@ -77,7 +79,7 @@ Ejemplo de un corpus dentro de `corpus.json`:
 
 Cómo se usan algunos campos:
 
-- **`id`**: sin espacios ni tildes. También va en la columna `corpus` de la hoja `fuentes`, para que esa bibliografía tenga prioridad.
+- **`id`**: sin espacios ni tildes. También va en la columna `corpus` de `fuentes.csv`, para que esa bibliografía tenga prioridad.
 - **`textoAlternativo`**: **el asistente no lo recibe**. Así no "ve" la imagen sin que el grupo la describa.
 - **Ficha** (título, autor, año, soporte, procedencia): el asistente sí la recibe.
 
