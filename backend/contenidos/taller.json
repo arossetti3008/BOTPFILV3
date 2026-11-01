@@ -1,0 +1,18 @@
+{
+  "comisiones": [
+    { "id": "manana", "nombre": "Mañana", "letra": "M" },
+    { "id": "tarde", "nombre": "Tarde", "letra": "T" }
+  ],
+  "patronGrupo": "^[MT][0-9]{1,2}$",
+  "ejemplosGrupo": ["M1", "T2"],
+  "aviso": {
+    "estado": "BORRADOR — el docente confirma el texto final",
+    "titulo": "Antes de empezar",
+    "puntos": [
+      "Vas a conversar con un asistente de inteligencia artificial (Gemini, de Google). Puede equivocarse: verificá lo que dice con la bibliografía y tu propia observación.",
+      "Lo que escriban en el chat se envía a Google para generar las respuestas. Esta aplicación usa el plan gratuito de Gemini, en el que Google puede usar esos contenidos para mejorar sus productos y pueden ser leídos por revisores humanos (desvinculados de la cuenta). No escriban nombres, datos personales ni información sensible.",
+      "La conversación se guarda solo en este dispositivo hasta que la exporten o la borren. No se comparte con otros grupos."
+    ],
+    "casilla": "Leí y entiendo"
+  }
+}

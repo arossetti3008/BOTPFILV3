@@ -1,169 +1,239 @@
-// Toda la logica de llamadas al LLM vive aca, aislada del resto de la app.
-// Si el dia de manana cambian de proveedor (Gemini -> Groq, etc.) o cambia
-// el nombre del modelo, solo hay que tocar este archivo.
+// Toda la lógica de llamadas a Gemini vive acá, aislada del resto de la app.
+// Si cambia el modelo o el proveedor, solo hay que tocar este archivo y la
+// configuración. Basado en el geminiService de Nódos (reintentos, mensajes en
+// español, log de fallas de red, clave por header).
+//
+// Privacidad: nunca se loguea el contenido de los mensajes ni de las
+// respuestas, solo metadatos (modelo, código de error, motivo).
 
 const URL_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 
-// El modelo se configura por variable de entorno a proposito: Google va
-// deprecando versiones de Gemini cada tanto (2.0 y 2.5 ya tienen fecha de
-// apagado en 2026), asi que definilo en tu .env sin tocar este codigo.
-// Ejemplos validos actuales: gemini-flash-latest, gemini-3-flash
-function obtenerModelo() {
-  return process.env.GEMINI_MODEL || 'gemini-flash-latest';
+// Errores que suelen ser temporales y vale la pena reintentar
+const CODIGOS_REINTENTABLES = [429, 503];
+
+// Motivos de corte que significan "respuesta bloqueada por seguridad"
+const MOTIVOS_BLOQUEO = new Set([
+  'SAFETY',
+  'RECITATION',
+  'BLOCKLIST',
+  'PROHIBITED_CONTENT',
+  'SPII',
+  'IMAGE_SAFETY',
+  'IMAGE_PROHIBITED_CONTENT',
+]);
+
+const MENSAJE_VARIOS_GRUPOS =
+  'El asistente está atendiendo a varios grupos, esperá unos segundos y volvé a enviar el mensaje.';
+const MENSAJE_SATURADO =
+  'El asistente está muy solicitado en este momento. Esperá unos segundos y volvé a intentar.';
+const MENSAJE_CUOTA_DIARIA =
+  'Se agotó la cuota diaria gratuita del asistente. Se renueva mañana alrededor de las 5 (hora argentina). ' +
+  'Mientras tanto, pueden seguir trabajando con la consigna, la bibliografía y su propia observación.';
+
+function crearError(mensaje, statusCode, extra = {}) {
+  const error = new Error(mensaje);
+  error.statusCode = statusCode;
+  Object.assign(error, extra);
+  return error;
 }
 
-// Espera la cantidad de ms indicada (usado para el backoff entre reintentos)
-function esperar(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+// Retry-After puede venir en segundos o como fecha HTTP
+function leerRetryAfterMs(valor) {
+  if (!valor) return null;
+  const segundos = Number(valor);
+  if (Number.isFinite(segundos)) return Math.max(0, segundos * 1000);
+  const fecha = Date.parse(valor);
+  return Number.isNaN(fecha) ? null : Math.max(0, fecha - Date.now());
 }
 
-// Codigos de error de Gemini que valen la pena reintentar, porque suelen ser
-// temporales (el modelo esta sobrecargado, o se supero un limite momentaneo)
-const CODIGOS_REINTENTABLES = [503, 429];
-const MAX_INTENTOS = 3;
-
-async function llamarGemini(systemInstruction, contents, intento = 1) {
-  const apiKey = process.env.LLM_API_KEY;
-  if (!apiKey) {
-    const error = new Error('Falta configurar LLM_API_KEY en el .env');
-    error.statusCode = 500;
-    throw error;
-  }
-
-  const modelo = obtenerModelo();
-  let respuesta;
+// Resume el cuerpo de error de Google para el log (sin contenido del chat)
+function resumirErrorGemini(detalle) {
   try {
-    respuesta = await fetch(`${URL_BASE}/${modelo}:generateContent`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-goog-api-key': apiKey,
-      },
-      body: JSON.stringify({
-        system_instruction: { parts: [{ text: systemInstruction }] },
-        contents,
-      }),
-    });
-  } catch (fallaDeRed) {
-    // Logueamos la causa real (certificado, DNS, proxy, etc.) para diagnosticar,
-    // en vez de dejar pasar el mensaje generico "fetch failed"
-    console.error('Fallo de red al llamar a Gemini. Causa:', fallaDeRed.cause || fallaDeRed);
-    const error = new Error(
-      `No se pudo conectar con la API de Gemini: ${fallaDeRed.cause?.code || fallaDeRed.message}`
-    );
-    error.statusCode = 502;
-    throw error;
+    const { error } = JSON.parse(detalle);
+    return `${error?.status || error?.code || ''} ${error?.message || ''}`.trim().slice(0, 300);
+  } catch {
+    return String(detalle).slice(0, 300);
+  }
+}
+
+// Google informa la cuota diaria agotada con un 429 cuyo detalle menciona
+// el límite "por día" (por ejemplo, GenerateRequestsPerDayPerProjectPerModel)
+function esCuotaDiaria(detalle) {
+  return /PerDay|per day|quota_exceeded|daily/i.test(detalle || '');
+}
+
+function crearServicioGemini({ config, cuota, fetchImpl, esperar }) {
+  const g = config.gemini;
+  const hacerFetch = fetchImpl || ((...args) => globalThis.fetch(...args));
+  const dormir = esperar || ((ms) => new Promise((resolve) => setTimeout(resolve, ms)));
+
+  function armarCuerpo(systemInstruction, contents) {
+    const generationConfig = { maxOutputTokens: g.maxTokensSalida };
+    if (g.temperatura !== null) generationConfig.temperature = g.temperatura;
+    if (g.nivelRazonamiento) generationConfig.thinkingConfig = { thinkingLevel: g.nivelRazonamiento };
+    return {
+      system_instruction: { parts: [{ text: systemInstruction }] },
+      contents,
+      generationConfig,
+    };
   }
 
-  if (!respuesta.ok) {
-    const detalle = await respuesta.text();
-    console.error(`Error de Gemini API (modelo: ${modelo}, intento ${intento}):`, respuesta.status, detalle);
-
-    // Si es un error temporal (modelo sobrecargado, limite momentaneo) y todavia
-    // nos quedan intentos, esperamos un poco mas cada vez y reintentamos solos,
-    // sin que el estudiante tenga que volver a mandar el mensaje.
-    if (CODIGOS_REINTENTABLES.includes(respuesta.status) && intento < MAX_INTENTOS) {
-      const esperaMs = intento * 1500; // 1.5s, luego 3s
-      console.warn(`Gemini no disponible temporalmente, reintentando en ${esperaMs}ms...`);
-      await esperar(esperaMs);
-      return llamarGemini(systemInstruction, contents, intento + 1);
-    }
-
-    // Se acabaron los reintentos: devolvemos un mensaje claro y accionable
-    if (CODIGOS_REINTENTABLES.includes(respuesta.status)) {
-      const error = new Error(
-        'El tutor IA esta muy solicitado en este momento. Espera unos segundos y volve a intentar.'
+  function interpretarRespuesta(data, modelo) {
+    const bloqueoPedido = data?.promptFeedback?.blockReason;
+    if (bloqueoPedido) {
+      console.error(`Gemini bloqueó el pedido (modelo ${modelo}). Motivo: ${bloqueoPedido}`);
+      throw crearError(
+        'Google bloqueó el mensaje con sus filtros de seguridad. Reformúlenlo sin datos personales ni contenido ofensivo.',
+        422,
+        { bloqueado: true }
       );
-      error.statusCode = 503;
-      throw error;
     }
 
-    const error = new Error('El servicio de tutor IA no esta disponible en este momento');
-    error.statusCode = 502;
-    throw error;
+    const candidato = data?.candidates?.[0];
+    const motivo = candidato?.finishReason;
+
+    if (MOTIVOS_BLOQUEO.has(motivo)) {
+      console.error(`Gemini bloqueó la respuesta (modelo ${modelo}). Motivo: ${motivo}`);
+      throw crearError(
+        'La respuesta del asistente fue bloqueada por los filtros de seguridad de Google. Prueben reformular el mensaje.',
+        422,
+        { bloqueado: true }
+      );
+    }
+
+    // Se juntan todas las partes de texto; las de razonamiento interno se descartan
+    const texto = (candidato?.content?.parts || [])
+      .filter((parte) => typeof parte.text === 'string' && !parte.thought)
+      .map((parte) => parte.text)
+      .join('')
+      .trim();
+
+    if (!texto) {
+      console.error(`Respuesta de Gemini sin texto (modelo ${modelo}). finishReason: ${motivo || 'ninguno'}`);
+      if (motivo === 'MAX_TOKENS') {
+        throw crearError(
+          'El asistente se quedó sin espacio para responder. Avisale al docente (revisar GEMINI_MAX_TOKENS_SALIDA).',
+          502
+        );
+      }
+      throw crearError('El asistente devolvió una respuesta vacía. Intenten de nuevo.', 502);
+    }
+
+    return { texto, modelo, truncada: motivo === 'MAX_TOKENS' };
   }
 
-  const data = await respuesta.json();
-  const texto = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-  if (!texto) {
-    console.error('Respuesta de Gemini sin texto utilizable:', JSON.stringify(data));
-    const error = new Error('Respuesta invalida del servicio de tutor IA');
-    error.statusCode = 502;
-    throw error;
+  function errorSinTiempo() {
+    return crearError('El asistente tardó demasiado en responder. Intenten de nuevo en unos segundos.', 504);
   }
 
-  return texto;
-}
+  // "limite" es el momento en que se acaba el presupuesto total del mensaje
+  async function llamarModelo(modelo, cuerpo, limite) {
+    for (let intento = 1; ; intento++) {
+      const restanteMs = limite - Date.now();
+      if (restanteMs < 1000) throw errorSinTiempo();
 
-function construirSystemPromptTutor(nodo) {
-  return `Sos un tutor de diseno y lenguaje visual, especializado en el concepto "${nodo.concepto}".
-Descripcion del concepto: ${nodo.descripcion}
+      const espera = cuota.esperaPorMinuto();
+      if (espera > 0) {
+        throw crearError(`${MENSAJE_VARIOS_GRUPOS} (Probá en ${espera} segundos.)`, 429, { esperaSegundos: espera });
+      }
+      cuota.registrarLlamada(modelo);
 
-Reglas:
-- Hace preguntas guia y ejercicios cortos para verificar que el estudiante entiende el concepto.
-- Da feedback constructivo, siempre en espanol.
-- Nunca reveles la respuesta correcta de forma directa sin que el estudiante haya intentado responder antes.
-- Se breve: maximo 4-5 oraciones por respuesta.
-- Tono calido y alentador, como un profesor que quiere que el alumno aprenda, no que se sienta evaluado.
-- No uses markdown ni asteriscos, escribi en texto plano.`;
-}
+      const controlador = new AbortController();
+      const plazoMs = Math.min(g.timeoutMs, restanteMs);
+      const temporizador = setTimeout(() => controlador.abort(), plazoMs);
+      let respuesta;
+      try {
+        respuesta = await hacerFetch(`${URL_BASE}/${encodeURIComponent(modelo)}:generateContent`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-goog-api-key': g.apiKey },
+          body: JSON.stringify(cuerpo),
+          signal: controlador.signal,
+        });
+      } catch (fallaDeRed) {
+        if (fallaDeRed.name === 'AbortError') {
+          console.error(`Gemini no respondió a tiempo (modelo ${modelo}, ${plazoMs} ms)`);
+          throw crearError('El asistente tardó demasiado en responder. Intenten de nuevo.', 504, {
+            probarRespaldo: true,
+          });
+        }
+        // La causa real (certificado, DNS, proxy) ayuda a diagnosticar
+        console.error('Falla de red al llamar a Gemini. Causa:', fallaDeRed.cause?.code || fallaDeRed.message);
+        throw crearError('No se pudo conectar con el servicio de Gemini. Intenten de nuevo en unos segundos.', 502);
+      } finally {
+        clearTimeout(temporizador);
+      }
 
-function mensajesAContenidoGemini(mensajes) {
-  return mensajes.map((m) => ({
-    role: m.rol === 'tutor' ? 'model' : 'user',
-    parts: [{ text: m.contenido }],
-  }));
-}
+      if (respuesta.ok) return interpretarRespuesta(await respuesta.json(), modelo);
 
-// Genera la siguiente respuesta del tutor dado el historial de la conversacion
-async function generarRespuestaTutor(nodo, mensajes) {
-  const systemInstruction = construirSystemPromptTutor(nodo);
-  const contents = mensajesAContenidoGemini(mensajes);
-  return llamarGemini(systemInstruction, contents);
-}
+      const detalle = await respuesta.text().catch(() => '');
+      const estado = respuesta.status;
+      console.error(`Error de Gemini (modelo ${modelo}, intento ${intento}): ${estado} ${resumirErrorGemini(detalle)}`);
 
-// Evalua si el estudiante demuestra dominio del concepto, en base a toda
-// la conversacion. Devuelve { resultado: 'aprobado' | 'a_reforzar', feedback }
-async function evaluarDominio(nodo, mensajes) {
-  const systemInstruction = `Sos un evaluador experto en el concepto de diseno "${nodo.concepto}" (${nodo.descripcion}).
-Vas a analizar una conversacion entre un tutor y un estudiante, y vas a decidir si el estudiante demuestra
-dominio real del concepto (no solo repetir definiciones, sino aplicarlas correctamente).
+      if (estado === 429 && esCuotaDiaria(detalle)) {
+        cuota.marcarAgotado(modelo);
+        throw crearError(MENSAJE_CUOTA_DIARIA, 429, { probarRespaldo: true });
+      }
 
-Responde UNICAMENTE con un JSON valido, sin texto adicional, sin bloques de codigo markdown, con este formato exacto:
-{"resultado": "aprobado", "feedback": "texto"}
-o
-{"resultado": "a_reforzar", "feedback": "texto"}
+      if (CODIGOS_REINTENTABLES.includes(estado)) {
+        const quedanIntentos = intento <= g.esperasReintentoMs.length;
+        const retryAfterMs = leerRetryAfterMs(respuesta.headers.get('retry-after'));
+        const esperaLarga = retryAfterMs !== null && retryAfterMs > g.esperaMaximaRetryAfterMs;
+        const esperaMs = quedanIntentos ? Math.max(g.esperasReintentoMs[intento - 1], retryAfterMs || 0) : 0;
+        // Solo se reintenta si después de esperar queda tiempo razonable
+        if (quedanIntentos && !esperaLarga && limite - Date.now() - esperaMs > 5000) {
+          console.warn(`Gemini no disponible temporalmente (modelo ${modelo}), reintentando en ${esperaMs} ms`);
+          await dormir(esperaMs);
+          continue;
+        }
+        throw crearError(MENSAJE_SATURADO, 503, { probarRespaldo: true });
+      }
 
-El feedback debe tener 2 a 3 oraciones, en espanol, dirigido directamente al estudiante.`;
-
-  const contents = mensajesAContenidoGemini(mensajes);
-  contents.push({
-    role: 'user',
-    parts: [{ text: 'Evalua ahora mi nivel de dominio de este concepto segun la conversacion anterior.' }],
-  });
-
-  const textoRespuesta = await llamarGemini(systemInstruction, contents);
-  const limpio = textoRespuesta.replace(/```json|```/g, '').trim();
-
-  let evaluacion;
-  try {
-    evaluacion = JSON.parse(limpio);
-  } catch (err) {
-    console.error('No se pudo parsear la evaluacion de Gemini como JSON:', textoRespuesta);
-    const error = new Error('No se pudo interpretar la evaluacion del tutor IA');
-    error.statusCode = 502;
-    throw error;
+      if (estado === 404) {
+        throw crearError(`El modelo "${modelo}" no existe o ya no está disponible. Avisale al docente.`, 502, {
+          probarRespaldo: true,
+        });
+      }
+      if (estado === 401 || estado === 403) {
+        throw crearError('La clave de Gemini no es válida o no tiene permisos. Avisale al docente.', 502);
+      }
+      throw crearError('El servicio del asistente no está disponible en este momento. Intenten de nuevo.', 502);
+    }
   }
 
-  if (!['aprobado', 'a_reforzar'].includes(evaluacion.resultado) || !evaluacion.feedback) {
-    console.error('Evaluacion de Gemini con formato inesperado:', evaluacion);
-    const error = new Error('El tutor IA devolvio un formato de evaluacion inesperado');
-    error.statusCode = 502;
-    throw error;
+  // Genera una respuesta. Prueba el modelo principal y, si se agotó su cuota,
+  // está saturado o ya no existe, pasa solo al modelo de respaldo.
+  async function generar({ systemInstruction, contents }) {
+    if (!config.geminiListo) {
+      throw crearError(
+        'El asistente todavía no está configurado (falta LLM_API_KEY o GEMINI_MODEL). Avisale al docente.',
+        503
+      );
+    }
+
+    const espera = cuota.esperaPorMinuto();
+    if (espera > 0) {
+      throw crearError(`${MENSAJE_VARIOS_GRUPOS} (Probá en ${espera} segundos.)`, 429, { esperaSegundos: espera });
+    }
+
+    const cuerpo = armarCuerpo(systemInstruction, contents);
+    const limite = Date.now() + g.presupuestoTotalMs;
+    const modelos = [g.modelo, g.modeloRespaldo].filter((m, i, lista) => m && lista.indexOf(m) === i);
+    let ultimoError = crearError(MENSAJE_CUOTA_DIARIA, 429);
+
+    for (const modelo of modelos) {
+      if (!cuota.disponibleHoy(modelo)) continue;
+      try {
+        return await llamarModelo(modelo, cuerpo, limite);
+      } catch (error) {
+        if (!error.probarRespaldo) throw error;
+        ultimoError = error;
+        console.warn(`Modelo ${modelo} no disponible (${error.statusCode}); se prueba el siguiente si hay.`);
+      }
+    }
+    throw ultimoError;
   }
 
-  return evaluacion;
+  return { generar };
 }
 
-module.exports = { generarRespuestaTutor, evaluarDominio };
+module.exports = { crearServicioGemini, esCuotaDiaria, leerRetryAfterMs };
