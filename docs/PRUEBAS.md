@@ -128,13 +128,7 @@ Cambio de diseño respecto de Nódos: el texto sobre el color de acento pasó a 
 
 ## Etapa 5 — Evidencias y privacidad (01/11/2026)
 
-Unknown command: "test"
-
-
-Did you mean this?
-  npm test # Test a package
-To see a list of supported npm commands, run:
-  npm help en : **16 tests, 16 pasan** (6 nuevos de ). Backend: 66 de 66.
+`npm test` en `frontend/`: **16 tests, 16 pasan** (6 nuevos de `exportar.js`). Backend: 66 de 66.
 
 | Funcionalidad | Implementado | Probado (cómo) | Pendiente |
 |---|---|---|---|
@@ -145,7 +139,7 @@ To see a list of supported npm commands, run:
 | Aviso del navegador al cerrar o recargar con mensajes sin exportar (beforeunload) | Sí | Navegador real: apareció el aviso; al cancelar, el grupo siguió en Análisis | Probar en celulares (algunos navegadores móviles no lo muestran) |
 | Aviso al "Empezar de nuevo" y al "Borrar" con mensajes sin exportar | Sí | Revisión de código (confirmación con la cantidad de mensajes) | — |
 | Contador "N mensajes sin exportar" en Análisis y "todo exportado" en Cierre | Sí | Navegador real | — |
-| Instrucciones de entrega editables () en Cierre | Sí | Test automático + captura | Texto final del docente (hoy dice EJEMPLO) |
+| Instrucciones de entrega editables (`backend/contenidos/entrega-evidencias.md`) en Cierre | Sí | Test automático + captura | Texto final del docente (hoy dice EJEMPLO) |
 | Dos grupos en el mismo navegador no comparten historial | Sí | Test unitario (Etapa 4) | — |
 
 ## Materiales reales del docente (01/11/2026)
