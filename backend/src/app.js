@@ -9,14 +9,24 @@ const { cargarTaller } = require('./config/taller');
 const { cargarCorpus } = require('./services/corpusService');
 const { crearCuota } = require('./services/cuotaService');
 const { crearServicioGemini } = require('./services/geminiService');
+const { crearServicioDrive } = require('./services/driveService');
+const { crearServicioBibliografia } = require('./services/bibliografiaService');
 const { crearLimiteGlobalPorIp } = require('./middleware/limites');
 const { crearRutasChat } = require('./routes/chatRoutes');
 const { crearRutasTaller } = require('./routes/tallerRoutes');
+const { crearRutasBibliografia } = require('./routes/bibliografiaRoutes');
 const { manejadorErrores, rutaNoEncontrada } = require('./middleware/errorHandler');
 
-function crearApp({ config, fetchImpl, esperar } = {}) {
+// fetchImpl reemplaza las llamadas a Gemini y fetchDrive las de Google Drive
+// (los tests usan versiones simuladas de ambos)
+function crearApp({ config, fetchImpl, fetchDrive, esperar } = {}) {
   const taller = cargarTaller();
   const corpusService = cargarCorpus();
+
+  const drive = config.drive.configurada
+    ? crearServicioDrive({ credenciales: config.drive.credenciales, folderId: config.drive.folderId, fetchImpl: fetchDrive })
+    : null;
+  const bibliografia = crearServicioBibliografia({ drive });
 
   const limitesDiarios = { [config.gemini.modelo]: config.gemini.rpdMax };
   if (config.gemini.modeloRespaldo) limitesDiarios[config.gemini.modeloRespaldo] = config.gemini.rpdMaxRespaldo;
@@ -24,6 +34,7 @@ function crearApp({ config, fetchImpl, esperar } = {}) {
   const gemini = crearServicioGemini({ config, cuota, fetchImpl, esperar });
 
   const app = express();
+  app.locals.bibliografia = bibliografia; // server.js inicia la sincronización
 
   // Render pone un proxy delante: sin esto, todas las IP parecerían la misma
   app.set('trust proxy', 1);
@@ -45,7 +56,8 @@ function crearApp({ config, fetchImpl, esperar } = {}) {
       estado: config.geminiListo ? 'ok' : 'incompleto',
       modelo: config.gemini.modelo || null,
       modeloRespaldo: config.gemini.modeloRespaldo || null,
-      fuentesIndexadas: 0, // la bibliografía se agrega en la Etapa 2
+      fuentesIndexadas: bibliografia.cantidadFuentes(),
+      bibliografia: bibliografia.estadoParaSalud(),
       corpusDisponibles: corpusService.listar().length,
       cuota: cuota.estado(),
       problemas,
@@ -53,7 +65,8 @@ function crearApp({ config, fetchImpl, esperar } = {}) {
   });
 
   app.use('/api', crearRutasTaller({ config, taller }));
-  app.use('/api/chat', crearRutasChat({ config, taller, corpusService, gemini }));
+  app.use('/api', crearRutasBibliografia({ config, bibliografia }));
+  app.use('/api/chat', crearRutasChat({ config, taller, corpusService, gemini, bibliografia }));
   app.use('/imagenes', express.static(corpusService.carpetaImagenes, { maxAge: '1h', index: false }));
 
   // Manejo de errores (siempre al final)

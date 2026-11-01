@@ -9,6 +9,9 @@ config.problemas.forEach((problema) => console.warn('[config]', problema));
 
 const app = crearApp({ config });
 
+// La bibliografía se sincroniza en segundo plano: el servidor no espera a Drive
+app.locals.bibliografia.iniciar(config.drive.resyncMinutos);
+
 app.listen(config.puerto, () => {
   console.log(
     `Servidor BOTPFILV3 en puerto ${config.puerto} (${config.entorno}). ` +

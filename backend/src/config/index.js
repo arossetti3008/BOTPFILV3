@@ -23,6 +23,43 @@ function texto(valor) {
   return (valor || '').trim();
 }
 
+// Credenciales de la cuenta de servicio: el JSON que descarga Google Cloud,
+// codificado en base64 para que entre en una sola variable de entorno
+function leerCredenciales(base64, problemas) {
+  if (!base64) return null;
+  try {
+    const datos = JSON.parse(Buffer.from(base64, 'base64').toString('utf8'));
+    if (!datos.client_email || !datos.private_key) throw new Error('faltan client_email o private_key');
+    return { client_email: datos.client_email, private_key: datos.private_key, token_uri: datos.token_uri };
+  } catch (error) {
+    problemas.push(`GOOGLE_SERVICE_ACCOUNT_JSON_BASE64 no es válido (${error.message}).`);
+    return null;
+  }
+}
+
+function leerDrive(env, problemas) {
+  let folderId = texto(env.DRIVE_FOLDER_ID);
+  // Los ids de Drive solo tienen letras, números, - y _ (evita inyectar en la consulta)
+  if (folderId && !/^[\w-]+$/.test(folderId)) {
+    problemas.push('DRIVE_FOLDER_ID no parece un id de carpeta de Drive válido.');
+    folderId = '';
+  }
+  const credenciales = leerCredenciales(texto(env.GOOGLE_SERVICE_ACCOUNT_JSON_BASE64), problemas);
+  const configurada = Boolean(folderId && credenciales);
+  if (!configurada) {
+    problemas.push('Bibliografía sin configurar (DRIVE_FOLDER_ID y credenciales de la cuenta de servicio): el chat funciona sin fuentes.');
+  }
+  const adminToken = texto(env.ADMIN_TOKEN);
+  if (!adminToken) problemas.push('Falta ADMIN_TOKEN: no se puede forzar la sincronización de la bibliografía.');
+  return {
+    folderId,
+    credenciales,
+    configurada,
+    resyncMinutos: entero(env.DRIVE_RESYNC_MINUTOS, 30, 0),
+    adminToken,
+  };
+}
+
 function cargarConfig(env = process.env) {
   const problemas = [];
   const entorno = texto(env.NODE_ENV) || 'development';
@@ -94,6 +131,7 @@ function cargarConfig(env = process.env) {
     // En el aula todos salen por la misma IP pública: este límite es alto a
     // propósito y solo frena abusos externos
     limiteIp: { ventanaMs: 15 * 60 * 1000, max: 2000 },
+    drive: leerDrive(env, problemas),
     problemas,
   };
 }

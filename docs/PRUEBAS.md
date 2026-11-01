@@ -35,6 +35,29 @@ Cada fila distingue qué está **implementado**, cómo fue **probado** y qué qu
 - **Red con inspección TLS:** en la PC de desarrollo, Node rechazó el certificado (`SELF_SIGNED_CERT_IN_CHAIN`). Se resolvió con `NODE_OPTIONS=--use-system-ca`, que usa los certificados de Windows sin desactivar la verificación. No afecta a Render.
 - **Tono del tutor (prompt provisional):** usó "chiques", "Contadme" (forma de España) y "conténtenme" (error). Se corrige en el prompt definitivo de la Etapa 3.
 
+## Etapa 2 — Bibliografía desde Drive (01/11/2026)
+
+`npm test`: **55 tests, 55 pasan**. Los de esta etapa usan un Drive simulado (verifica la firma del token con la clave pública, como Google) y PDFs generados localmente con texto sintético; la extracción de texto es real (`unpdf`).
+
+| Funcionalidad | Implementado | Probado (cómo) | Pendiente |
+|---|---|---|---|
+| Autenticación con cuenta de servicio (JWT firmado con `node:crypto`) | Sí | Test automático (el Drive simulado rechaza firmas inválidas) | Con credenciales reales |
+| Listado de la carpeta, descarga de PDF, exportación de Google Docs a PDF y de la hoja a CSV | Sí | Test automático | Con la carpeta real |
+| Extracción de texto por página y aviso de página sin texto | Sí | Test automático (PDF de 3 páginas, la 3.ª vacía) | Con PDFs reales; si hay escaneados, decidir OCR con el usuario |
+| Hoja `fuentes`: columnas exactas, fila sin archivo, archivo sin fila, datos faltantes, tipos no soportados | Sí | Test automático | — |
+| Fragmentos de hasta 350 palabras, sin cruzar páginas | Sí | Test automático | — |
+| Búsqueda BM25 (minúsculas, sin tildes, sin palabras vacías, plurales simples) con prioridad al corpus activo | Sí | Test automático: un término de la página 2 devuelve la página 2 (citada "p. 24" con `paginaInicial` 23) | Calidad de la búsqueda con la bibliografía real |
+| Re-sincronización solo si cambió algún archivo; descarga solo lo modificado | Sí | Test automático | — |
+| Si Drive falla, se conserva el último índice | Sí | Test automático | — |
+| Credenciales inválidas: el servidor arranca y `/api/health` lo informa; el chat responde sin fuentes | Sí | Test automático | — |
+| `POST /api/admin/sincronizar`: 401 sin token o con token incorrecto; reporte con el correcto | Sí | Test automático | — |
+| `GET /api/bibliografia` | Sí | Test automático | — |
+| Inyección de fuentes: nada en fase 1; desde la fase 2, `TOP_FRAGMENTOS` bloques `[FUENTE n]` en el turno del grupo y lista de fuentes en la respuesta | Sí | Test automático | Ver cómo cita Gemini real (Etapa 3) |
+| Tiempo de indexación | Medido | Script local: PDF sintético de 100 páginas (28.396 palabras) → 636 ms y unos 23 MB de memoria; cada búsqueda tarda 0,16 ms | Medir con la carpeta real (suma la descarga desde Drive) |
+| **Sincronización con la carpeta real** | — | No probado: todavía no hay cuenta de servicio ni carpeta | Pendiente hasta que el docente las cree (guía en `docs/GUIA_DOCENTE.md`) |
+
+Dependencia nueva: `unpdf` 2.1.0. `npm audit` informa 2 avisos moderados en `nodemon` (solo desarrollo local, no se despliega).
+
 ## Fuentes oficiales consultadas (01/11/2026)
 
 | Tema | URL | Dato usado |
