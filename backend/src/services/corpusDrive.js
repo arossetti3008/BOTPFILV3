@@ -107,9 +107,11 @@ function crearLectorCorpusDrive({ drive }) {
     };
     for (const [i, { datos, foto }] of pares.entries()) {
       const contenido = await bajar(foto);
+      // Sin el prefijo "Corpus …": el mensaje ya va con el nombre de la carpeta
       const { error, aviso } = revisarPeso(id, foto.name, contenido.length);
-      if (error) errores.push(error);
-      if (aviso) avisos.push(aviso);
+      const sinPrefijo = (texto) => texto.replace(/^Corpus "[^"]*": /, '');
+      if (error) errores.push(sinPrefijo(error));
+      if (aviso) avisos.push(sinPrefijo(aviso));
       const imagenId = `img${i + 1}`;
       imagenes.set(`${id}/${imagenId}`, { mimeType: foto.mimeType, datos: contenido });
       corpus.imagenes.push({
