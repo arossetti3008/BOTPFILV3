@@ -342,47 +342,71 @@ a:focus-visible {
 .estado-servidor { max-width: 720px; margin: 32px auto; text-align: center; }
 .estado-servidor p { text-align: center; hyphens: manual; -webkit-hyphens: manual; }
 
-/* Animación de espera: tres formas que cambian de lugar cada 2 s */
+/* Animación de espera: la composición se arma en 5 pasos (las dimensiones de LV III) */
 .animacion-espera {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   margin-bottom: 8px;
 }
-.formas { width: min(260px, 100%); height: auto; overflow: visible; }
-.formas-linea {
-  stroke: var(--borde);
-  stroke-width: 2;
+.composicion { width: min(300px, 100%); height: auto; overflow: visible; margin-bottom: 6px; }
+.capa { opacity: 0; transition: opacity 0.6s ease; }
+.capa.visible { opacity: 1; }
+.trazo {
+  fill: none;
   stroke-linecap: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  transition: stroke-dashoffset 2.2s ease-in-out;
 }
-.forma { animation: cambiar-lugar 6s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
-.forma-1 { transform: translate(-60px, 0); }
-.forma-2 { animation-delay: -2s; }
-.forma-3 { transform: translate(60px, 0); animation-delay: -4s; }
-.forma-figura {
+.capa.visible .trazo { stroke-dashoffset: 0; }
+.marco { stroke: var(--texto-suave); stroke-width: 2; }
+.linea-diagonal { stroke: var(--azul); stroke-width: 3; }
+.mirada { stroke: var(--texto-suave); stroke-width: 1; stroke-dasharray: 100; opacity: 0.7; }
+.union { stroke: var(--borde); stroke-width: 2; }
+.punto, .punto-de-vista, .plano, .miniatura {
   transform-box: fill-box;
   transform-origin: center;
-  animation: latir 2s ease-in-out infinite;
+  transform: scale(0);
+  transition: transform 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) 0.5s;
 }
-.forma-1 .forma-figura { fill: var(--acento); }
-.forma-2 .forma-figura { fill: var(--azul); animation-name: girar; }
-.forma-3 .forma-figura { fill: var(--amarillo); }
-@keyframes cambiar-lugar {
-  0%, 22% { transform: translate(-60px, 0); }
-  33%, 55% { transform: translate(0, 0); }
-  66%, 85% { transform: translate(60px, 0); }
-  93% { transform: translate(0, -36px); } /* vuelve al comienzo por arriba */
-  100% { transform: translate(-60px, 0); }
+.capa.visible .punto,
+.capa.visible .punto-de-vista,
+.capa.visible .plano,
+.capa.visible .miniatura { transform: scale(1); }
+.punto { fill: var(--acento); }
+.punto-de-vista { fill: var(--texto); transition-delay: 1.8s; }
+.plano-a { fill: var(--amarillo); opacity: 0.85; }
+.plano-b { fill: var(--azul); opacity: 0.55; transition-delay: 1s; }
+.miniatura rect { fill: var(--bg-elevada); stroke: var(--texto-suave); stroke-width: 1.5; }
+.miniatura-1 circle { fill: var(--acento); }
+.miniatura-2 circle { fill: var(--azul); }
+.miniatura-3 circle { fill: var(--amarillo); }
+.miniatura-2 { transition-delay: 0.9s; }
+.miniatura-3 { transition-delay: 1.3s; }
+.espera-pasos {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+  width: min(300px, 100%);
 }
-@keyframes latir {
-  0%, 60%, 100% { transform: scale(1); }
-  80% { transform: scale(0.82); }
+.espera-tramo {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--borde);
+  overflow: hidden;
 }
-@keyframes girar {
-  0%, 60% { transform: rotate(0deg); }
-  100% { transform: rotate(90deg); }
+.espera-tramo > span {
+  display: block;
+  height: 100%;
+  background: var(--acento);
+  transform-origin: left;
+  transition: transform 0.5s linear;
 }
+.espera-paso { margin: 4px 0 0; font-size: 0.9rem; color: var(--texto-suave); }
+.espera-paso strong { color: var(--texto); }
+.espera-tiempo { margin: 0; font-size: 0.85rem; color: var(--texto-suave); }
 .animacion-frase {
   min-height: 3.2em;
   max-width: 36ch;
@@ -398,7 +422,8 @@ a:focus-visible {
   from { opacity: 0; transform: translateY(6px); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .forma, .forma-figura, .animacion-frase { animation: none !important; }
+  .capa, .trazo, .punto, .punto-de-vista, .plano, .miniatura, .espera-tramo > span { transition: none !important; }
+  .animacion-frase { animation: none !important; }
 }
 
 /* ---------- Análisis ---------- */

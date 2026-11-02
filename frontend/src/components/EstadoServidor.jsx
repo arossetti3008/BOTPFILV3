@@ -20,8 +20,8 @@ export default function EstadoServidor({ estado, onReintentar }) {
       <div role="status">
         {estado.lento ? (
           <p className="texto-suave">
-            El servidor está despertando: en el plan gratuito se duerme cuando no se usa y puede tardar hasta un
-            minuto. No cierren la página, entra solo.
+            El servidor está despertando (en el plan gratuito se duerme cuando no se usa). No cierren la página: entra
+            solo.
           </p>
         ) : (
           <p className="texto-suave">Conectando con el servidor…</p>
