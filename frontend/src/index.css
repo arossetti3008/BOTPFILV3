@@ -342,88 +342,71 @@ a:focus-visible {
 .estado-servidor { max-width: 720px; margin: 32px auto; text-align: center; }
 .estado-servidor p { text-align: center; hyphens: manual; -webkit-hyphens: manual; }
 
-/* Animación de espera: la composición se arma en 5 pasos (las dimensiones de LV III) */
+/* Animación de espera: Línea → Forma → Color → Textura → Volumen */
 .animacion-espera {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
   margin-bottom: 8px;
 }
-.composicion { width: min(300px, 100%); height: auto; overflow: visible; margin-bottom: 6px; }
-.capa { opacity: 0; transition: opacity 0.6s ease; }
-.capa.visible { opacity: 1; }
-.trazo {
+.sintaxis { width: 120px; height: 120px; overflow: visible; }
+.sintaxis-linea {
   fill: none;
+  stroke: var(--texto);
+  stroke-width: 2;
   stroke-linecap: round;
   stroke-dasharray: 100;
-  stroke-dashoffset: 100;
-  transition: stroke-dashoffset 2.2s ease-in-out;
+  stroke-dashoffset: 0;
+  transform: rotate(-90deg);
+  transform-origin: 60px 58px;
+  transition: opacity 0.4s ease;
 }
-.capa.visible .trazo { stroke-dashoffset: 0; }
-.marco { stroke: var(--texto-suave); stroke-width: 2; }
-.linea-diagonal { stroke: var(--azul); stroke-width: 3; }
-.mirada { stroke: var(--texto-suave); stroke-width: 1; stroke-dasharray: 100; opacity: 0.7; }
-.union { stroke: var(--borde); stroke-width: 2; }
-.punto, .punto-de-vista, .plano, .miniatura {
-  transform-box: fill-box;
-  transform-origin: center;
-  transform: scale(0);
-  transition: transform 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) 0.5s;
+.sintaxis-relleno {
+  fill: var(--texto-suave);
+  opacity: 0;
+  transition: fill 0.5s ease, opacity 0.4s ease;
 }
-.capa.visible .punto,
-.capa.visible .punto-de-vista,
-.capa.visible .plano,
-.capa.visible .miniatura { transform: scale(1); }
-.punto { fill: var(--acento); }
-.punto-de-vista { fill: var(--texto); transition-delay: 1.8s; }
-.plano-a { fill: var(--amarillo); opacity: 0.85; }
-.plano-b { fill: var(--azul); opacity: 0.55; transition-delay: 1s; }
-.miniatura rect { fill: var(--bg-elevada); stroke: var(--texto-suave); stroke-width: 1.5; }
-.miniatura-1 circle { fill: var(--acento); }
-.miniatura-2 circle { fill: var(--azul); }
-.miniatura-3 circle { fill: var(--amarillo); }
-.miniatura-2 { transition-delay: 0.9s; }
-.miniatura-3 { transition-delay: 1.3s; }
-.espera-pasos {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 5px;
-  width: min(300px, 100%);
+.sintaxis-trama,
+.sintaxis-luz,
+.sintaxis-sombra { opacity: 0; transition: opacity 0.5s ease; }
+.sintaxis-sombra { fill: var(--texto); }
+/* Línea: el contorno se dibuja (se repite en cada vuelta) */
+.paso-0 .sintaxis-linea { animation: trazar 0.9s ease-in-out both; }
+@keyframes trazar {
+  from { stroke-dashoffset: 100; }
+  to { stroke-dashoffset: 0; }
 }
-.espera-tramo {
-  height: 6px;
-  border-radius: 3px;
-  background: var(--borde);
-  overflow: hidden;
+/* Forma: un plano, sin color todavía */
+.paso-1 .sintaxis-relleno { opacity: 0.35; }
+/* Color */
+.paso-2 .sintaxis-relleno,
+.paso-3 .sintaxis-relleno,
+.paso-4 .sintaxis-relleno { fill: var(--color-forma); opacity: 1; }
+.paso-2 .sintaxis-linea,
+.paso-3 .sintaxis-linea,
+.paso-4 .sintaxis-linea { opacity: 0; }
+/* Textura */
+.paso-3 .sintaxis-trama { opacity: 1; }
+/* Volumen: luz, sombra propia y sombra proyectada */
+.paso-4 .sintaxis-luz { opacity: 1; }
+.paso-4 .sintaxis-sombra { opacity: 0.18; }
+.sintaxis-pasos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9rem;
+  color: var(--texto-suave);
 }
-.espera-tramo > span {
-  display: block;
-  height: 100%;
-  background: var(--acento);
-  transform-origin: left;
-  transition: transform 0.5s linear;
-}
-.espera-paso { margin: 4px 0 0; font-size: 0.9rem; color: var(--texto-suave); }
-.espera-paso strong { color: var(--texto); }
-.espera-tiempo { margin: 0; font-size: 0.85rem; color: var(--texto-suave); }
-.animacion-frase {
-  min-height: 3.2em;
-  max-width: 36ch;
-  margin: 0 auto;
-  font-family: var(--fuente-display);
-  font-style: italic;
-  font-size: 1.08rem;
-  line-height: 1.5;
-  color: var(--texto);
-  animation: aparecer 0.6s ease both;
-}
-@keyframes aparecer {
-  from { opacity: 0; transform: translateY(6px); }
-}
+.sintaxis-pasos li { text-align: center; transition: color 0.3s ease; }
+.sintaxis-pasos li.hecho { color: var(--texto); }
+.sintaxis-pasos li.activo { color: var(--acento); font-weight: 700; }
 @media (prefers-reduced-motion: reduce) {
-  .capa, .trazo, .punto, .punto-de-vista, .plano, .miniatura, .espera-tramo > span { transition: none !important; }
-  .animacion-frase { animation: none !important; }
+  .sintaxis *, .sintaxis-pasos li { transition: none !important; animation: none !important; }
 }
 
 /* ---------- Análisis ---------- */
