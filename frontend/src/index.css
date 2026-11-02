@@ -340,6 +340,66 @@ a:focus-visible {
   padding: 12px;
 }
 .estado-servidor { max-width: 720px; margin: 32px auto; text-align: center; }
+.estado-servidor p { text-align: center; hyphens: manual; -webkit-hyphens: manual; }
+
+/* Animación de espera: tres formas que cambian de lugar cada 2 s */
+.animacion-espera {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.formas { width: min(260px, 100%); height: auto; overflow: visible; }
+.formas-linea {
+  stroke: var(--borde);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.forma { animation: cambiar-lugar 6s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
+.forma-1 { transform: translate(-60px, 0); }
+.forma-2 { animation-delay: -2s; }
+.forma-3 { transform: translate(60px, 0); animation-delay: -4s; }
+.forma-figura {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: latir 2s ease-in-out infinite;
+}
+.forma-1 .forma-figura { fill: var(--acento); }
+.forma-2 .forma-figura { fill: var(--azul); animation-name: girar; }
+.forma-3 .forma-figura { fill: var(--amarillo); }
+@keyframes cambiar-lugar {
+  0%, 22% { transform: translate(-60px, 0); }
+  33%, 55% { transform: translate(0, 0); }
+  66%, 85% { transform: translate(60px, 0); }
+  93% { transform: translate(0, -36px); } /* vuelve al comienzo por arriba */
+  100% { transform: translate(-60px, 0); }
+}
+@keyframes latir {
+  0%, 60%, 100% { transform: scale(1); }
+  80% { transform: scale(0.82); }
+}
+@keyframes girar {
+  0%, 60% { transform: rotate(0deg); }
+  100% { transform: rotate(90deg); }
+}
+.animacion-frase {
+  min-height: 3.2em;
+  max-width: 36ch;
+  margin: 0 auto;
+  font-family: var(--fuente-display);
+  font-style: italic;
+  font-size: 1.08rem;
+  line-height: 1.5;
+  color: var(--texto);
+  animation: aparecer 0.6s ease both;
+}
+@keyframes aparecer {
+  from { opacity: 0; transform: translateY(6px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .forma, .forma-figura, .animacion-frase { animation: none !important; }
+}
 
 /* ---------- Análisis ---------- */
 .analisis { display: flex; flex-direction: column; gap: 0; }

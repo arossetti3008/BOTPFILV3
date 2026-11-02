@@ -1,5 +1,8 @@
-// Mensaje mientras se conecta con el servidor (que puede estar despertando)
-// o si no se pudo conectar, con un botón para reintentar.
+// Pantalla mientras se conecta con el servidor (que puede estar despertando:
+// en Render gratuito tarda hasta un minuto), con una animación para que la
+// espera no parezca un error. Si no se pudo conectar, botón para reintentar.
+import AnimacionEspera from './AnimacionEspera';
+
 export default function EstadoServidor({ estado, onReintentar }) {
   if (estado.error) {
     return (
@@ -12,13 +15,18 @@ export default function EstadoServidor({ estado, onReintentar }) {
     );
   }
   return (
-    <div className="tarjeta estado-servidor" role="status">
-      <p>Conectando con el servidor…</p>
-      {estado.lento && (
-        <p className="texto-suave">
-          El servidor está despertando: en el plan gratuito puede tardar hasta un minuto la primera vez. No cierren la página.
-        </p>
-      )}
+    <div className="tarjeta estado-servidor">
+      <AnimacionEspera />
+      <div role="status">
+        {estado.lento ? (
+          <p className="texto-suave">
+            El servidor está despertando: en el plan gratuito se duerme cuando no se usa y puede tardar hasta un
+            minuto. No cierren la página, entra solo.
+          </p>
+        ) : (
+          <p className="texto-suave">Conectando con el servidor…</p>
+        )}
+      </div>
     </div>
   );
 }
