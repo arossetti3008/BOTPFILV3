@@ -189,6 +189,24 @@ Carpetas de Drive del docente: "Bibliografía LV 3" (6 PDFs, sin hoja `fuentes`)
 - Mejorar el PDF de Giglietti (pasarlo por OCR resolvería el texto ilegible).
 - Sincronización real y una conversación con citas reales.
 
+## Carpeta contenedora: bibliografía y corpus desde Drive (01/11/2026)
+
+El docente reorganizó los materiales en una carpeta principal con una subcarpeta "Bibliografía" (común a todos los corpus) y una carpeta "Corpus …" por corpus (3 fotos y un documento "Ficha"). `DRIVE_FOLDER_ID` pasa a ser la carpeta principal.
+
+Tests nuevos (`backend/test/corpus-drive.test.js`, Drive simulado; 78 tests en total):
+- La ficha se lee con etiquetas con sinónimos, tildes, viñetas y textos de varios renglones.
+- Los corpus salen de las carpetas "Corpus …" y reemplazan a los del proyecto; una carpeta con 2 fotos no se ofrece y se informa el motivo.
+- La bibliografía se toma solo de "Bibliografía". Si esa carpeta no existe, se usa toda la contenedora, salteando las carpetas de corpus.
+- Las fotos se sirven desde la memoria del servidor (`/imagenes/<corpus>/<imagen>`) y son las que recibe Gemini cuando el grupo las pide.
+- "Archivo:" en la ficha asigna cada foto aunque no estén en orden alfabético.
+- Si una ficha se rompe o Drive deja de responder, se sigue usando la última versión válida del corpus.
+- Al arrancar, `/api/corpus` espera la primera lectura de Drive (máximo 20 s), para no ofrecer por unos segundos el corpus de respaldo.
+- `POST /api/admin/sincronizar` responde con dos partes: `bibliografia` y `corpus`.
+
+La ficha del corpus 1, escrita en el formato nuevo, está en `docs/ficha-corpus-1.txt` y se verificó que se lee completa (3 imágenes con 7 datos cada una).
+
+**Pendiente:** probar con la carpeta real del docente (falta el enlace y que la comparta con la cuenta de servicio).
+
 ## Fuentes oficiales consultadas (01/11/2026)
 
 | Tema | URL | Dato usado |

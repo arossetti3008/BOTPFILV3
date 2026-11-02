@@ -1,6 +1,6 @@
 // GET /api/bibliografia — lista de fuentes disponibles (sin los PDFs)
-// POST /api/admin/sincronizar — fuerza la sincronización con Drive
-//   (protegido con el header x-admin-token = ADMIN_TOKEN)
+// POST /api/admin/sincronizar — fuerza la sincronización con Drive de la
+//   bibliografía y de los corpus (protegido con el header x-admin-token = ADMIN_TOKEN)
 
 const crypto = require('node:crypto');
 const express = require('express');
@@ -12,7 +12,7 @@ function tokensIguales(a, b) {
   return crypto.timingSafeEqual(hashA, hashB);
 }
 
-function crearRutasBibliografia({ config, bibliografia }) {
+function crearRutasBibliografia({ config, bibliografia, corpusService }) {
   const router = express.Router();
 
   router.get('/bibliografia', (req, res) => {
@@ -29,13 +29,12 @@ function crearRutasBibliografia({ config, bibliografia }) {
     next();
   }
 
-  router.post('/admin/sincronizar', exigirTokenAdmin, async (req, res, next) => {
-    try {
-      res.json(await bibliografia.sincronizar({ forzar: true }));
-    } catch (error) {
-      error.statusCode = error.statusCode || 502;
-      next(error);
-    }
+  // Responde con el reporte de cada parte; si una falla, su error va en "error"
+  router.post('/admin/sincronizar', exigirTokenAdmin, async (req, res) => {
+    const [bib, cor] = await Promise.allSettled([bibliografia.sincronizar({ forzar: true }), corpusService.sincronizar()]);
+    const resultado = (r) => (r.status === 'fulfilled' ? r.value : { error: r.reason.message });
+    const ambasFallaron = bib.status === 'rejected' && cor.status === 'rejected';
+    res.status(ambasFallaron ? bib.reason.statusCode || 502 : 200).json({ bibliografia: resultado(bib), corpus: resultado(cor) });
   });
 
   return router;

@@ -9,7 +9,8 @@
 // Datos de cada fuente (autor, año, título, página): se toman de la hoja
 // "fuentes" de la carpeta de Drive si existe; si no, del archivo del proyecto
 // backend/contenidos/fuentes.csv (mismas columnas). Los PDF pueden estar en
-// subcarpetas.
+// subcarpetas. Dónde se buscan los archivos lo decide "listarArchivos" (en
+// la app: la carpeta "Bibliografía" de la contenedora, ver contenedorDrive.js).
 
 const fs = require('node:fs');
 const path = require('node:path');
@@ -83,6 +84,7 @@ function crearServicioBibliografia({
   extraerPaginas = extraerPaginasPdf,
   ahora = () => Date.now(),
   leerFuentesLocales = leerFuentesLocalesPorDefecto,
+  listarArchivos = async () => ({ archivos: await drive.listarCarpeta(), avisos: [], ubicacion: 'carpeta principal' }),
 }) {
   let indice = null; // { fuentes, fragmentos, bm25 }
   let firmaCarpeta = null; // id:modifiedTime de todos los archivos, para detectar cambios
@@ -139,7 +141,7 @@ function crearServicioBibliografia({
     if (!indice) estado.estado = 'sincronizando';
 
     try {
-      const archivos = await drive.listarCarpeta();
+      const { archivos, avisos: avisosCarpeta = [], ubicacion: carpetaBibliografia } = await listarArchivos();
       const firma = archivos
         .map((a) => `${a.id}:${a.modifiedTime}`)
         .sort()
@@ -148,7 +150,7 @@ function crearServicioBibliografia({
         return { ...estado.reporte, sinCambios: true };
       }
 
-      const advertencias = [];
+      const advertencias = [...avisosCarpeta];
       const hoja = archivos.find((a) => ['fuentes', 'fuentes.csv'].includes(a.name.trim().toLowerCase())) || null;
       const { filas, origen } = await leerDatosFuentes(hoja);
 
@@ -243,6 +245,7 @@ function crearServicioBibliografia({
       const reporte = {
         fecha: new Date(ahora()).toISOString(),
         duracionMs: ahora() - inicio,
+        carpetaBibliografia,
         datosDeLasFuentes: origen,
         fuentes: fuentes.length,
         paginas: paginasTotales,

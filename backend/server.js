@@ -9,8 +9,10 @@ config.problemas.forEach((problema) => console.warn('[config]', problema));
 
 const app = crearApp({ config });
 
-// La bibliografía se sincroniza en segundo plano: el servidor no espera a Drive
+// Bibliografía y corpus se sincronizan con Drive en segundo plano: el
+// servidor no espera a Drive (mientras tanto, usa los corpus del proyecto)
 app.locals.bibliografia.iniciar(config.drive.resyncMinutos);
+app.locals.corpus.iniciar(config.drive.resyncMinutos);
 
 app.listen(config.puerto, () => {
   console.log(

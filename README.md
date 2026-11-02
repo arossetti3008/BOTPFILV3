@@ -16,10 +16,11 @@ historial en el dispositivo          el pedido con:
 exportación .txt / .json               · el prompt del tutor (fase 1, 2 o 3)
                                        · 4 fragmentos de bibliografía (desde la fase 2)
                                        · las 3 imágenes, solo si el grupo las pide
-                                     Bibliografía: lee la carpeta de Drive  ◄──  Drive del docente
-                                     al arrancar y cada 30 min (índice en memoria)
+                                     Corpus y bibliografía: lee la carpeta  ◄──  Drive del docente
+                                     de Drive al arrancar y cada 30 min        (Bibliografía/, Corpus 1/, …)
 ```
 
+- **Los materiales viven en una carpeta de Drive del docente:** una subcarpeta "Bibliografía" (común a todos los corpus) y una carpeta "Corpus …" por corpus, con sus 3 fotos y un documento "ficha". Los corpus de `backend/contenidos/corpus/` quedan como respaldo si Drive no está configurado o falla.
 - **Sin base de datos ni cuentas de usuario.** El grupo se identifica con comisión, código (M1, T2…) y corpus. La conversación queda solo en el dispositivo hasta que se exporta o se borra.
 - **Las tres fases las controla el servidor:** en la fase 1 el asistente no recibe bibliografía; la fase 2 empieza cuando el grupo escribió su interpretación; la fase 3 la pide el grupo.
 - **El servidor no guarda el contenido de los mensajes.** Los registros tienen solo metadatos: grupo, corpus, fase, modelo, duración y resultado.
@@ -29,7 +30,7 @@ exportación .txt / .json               · el prompt del tutor (fase 1, 2 o 3)
 | Carpeta | Contenido |
 |---|---|
 | `backend/` | Servidor Express. `src/prompts/tutorLV3.js` es el único archivo con instrucciones pedagógicas. |
-| `backend/contenidos/` | Lo que edita el docente: corpus e imágenes, aviso inicial (`taller.json`), dimensiones, consigna, instrucciones de entrega. |
+| `backend/contenidos/` | Aviso inicial (`taller.json`), dimensiones, consigna, instrucciones de entrega, datos de cada PDF (`fuentes.csv`) y el corpus de respaldo. |
 | `frontend/` | App React + Vite. |
 | `docs/` | Guía docente, instructivo de Drive, pruebas, conversaciones de prueba del tutor, borrador del prompt. |
 
@@ -55,13 +56,13 @@ cp .env.example .env        # en Windows: copy .env.example .env
 npm run dev                 # abrí http://localhost:5173
 ```
 
-- Sin bibliografía configurada, la app funciona igual y el asistente avisa que no puede citar. Para activarla, ver [docs/CUENTA_DE_SERVICIO.md](docs/CUENTA_DE_SERVICIO.md) (administración) y [docs/INSTRUCTIVO_DOCENTE_BIBLIOGRAFIA.md](docs/INSTRUCTIVO_DOCENTE_BIBLIOGRAFIA.md) (docente).
+- Sin Drive configurado, la app usa el corpus de respaldo del proyecto y el asistente avisa que no puede citar. Para activarla, ver [docs/CUENTA_DE_SERVICIO.md](docs/CUENTA_DE_SERVICIO.md) (administración) y [docs/INSTRUCTIVO_DOCENTE_BIBLIOGRAFIA.md](docs/INSTRUCTIVO_DOCENTE_BIBLIOGRAFIA.md) (docente).
 - **Redes con inspección de certificados** (algunas redes institucionales): si el servidor muestra `SELF_SIGNED_CERT_IN_CHAIN`, arrancalo con `NODE_OPTIONS=--use-system-ca` (PowerShell: `$env:NODE_OPTIONS="--use-system-ca"; npm run dev`).
 
 ### Pruebas
 
 ```bash
-cd backend && npm test      # 71 tests, con Gemini y Drive simulados
+cd backend && npm test      # 78 tests, con Gemini y Drive simulados
 cd frontend && npm test     # 16 tests (guardado, fases, exportación)
 cd frontend && npm run build
 ```

@@ -81,7 +81,7 @@ test('GET /api/corpus/:id devuelve el corpus con URLs de imágenes y sin rutas i
   const res = await request(app).get(`/api/corpus/${h.CORPUS_ID}`);
   assert.equal(res.status, 200);
   assert.equal(res.body.imagenes.length, 3);
-  assert.equal(res.body.imagenes[0].url, '/imagenes/EJEMPLO-1.jpg');
+  assert.equal(res.body.imagenes[0].url, `/imagenes/${h.CORPUS_ID}/img1`);
   assert.ok(res.body.imagenes.every((imagen) => !('archivo' in imagen)));
   assert.ok(!JSON.stringify(res.body).includes('contenidos'));
 

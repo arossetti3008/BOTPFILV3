@@ -116,30 +116,31 @@ function crearServicioDrive({ credenciales, folderId, fetchImpl, ahora = () => D
     return archivos;
   }
 
-  // Lista todos los archivos de la carpeta compartida y de sus subcarpetas
-  // (hasta MAX_NIVELES de profundidad). Los accesos directos de Drive se
-  // reemplazan por el archivo al que apuntan. Cada archivo lleva "carpeta"
-  // con la ruta relativa donde está (para los mensajes del reporte).
-  async function listarCarpeta() {
+  // Como listarHijos, pero reemplaza cada acceso directo de Drive por el
+  // archivo o la carpeta a la que apunta
+  async function listarHijosResueltos(carpetaId) {
+    return (await listarHijos(carpetaId)).map((item) =>
+      item.mimeType === TIPO_ACCESO_DIRECTO && item.shortcutDetails?.targetId
+        ? { ...item, id: item.shortcutDetails.targetId, mimeType: item.shortcutDetails.targetMimeType, accesoDirecto: true }
+        : item
+    );
+  }
+
+  // Lista todos los archivos de una carpeta (por defecto, la compartida) y de
+  // sus subcarpetas, hasta MAX_NIVELES de profundidad. "excluir" son ids de
+  // subcarpetas que no se recorren. Cada archivo lleva "carpeta" con la ruta
+  // relativa donde está (para los mensajes del reporte).
+  async function listarCarpeta(raiz = folderId, { excluir = new Set() } = {}) {
     const archivos = [];
-    const pendientes = [{ id: folderId, ruta: '', nivel: 0 }];
+    const pendientes = [{ id: raiz, ruta: '', nivel: 0 }];
     const visitadas = new Set();
     while (pendientes.length) {
       const actual = pendientes.shift();
       if (visitadas.has(actual.id)) continue;
       visitadas.add(actual.id);
-      for (const item of await listarHijos(actual.id)) {
-        let archivo = item;
-        if (item.mimeType === TIPO_ACCESO_DIRECTO && item.shortcutDetails?.targetId) {
-          archivo = {
-            ...item,
-            id: item.shortcutDetails.targetId,
-            mimeType: item.shortcutDetails.targetMimeType,
-            accesoDirecto: true,
-          };
-        }
+      for (const archivo of await listarHijosResueltos(actual.id)) {
         if (archivo.mimeType === TIPO_CARPETA) {
-          if (actual.nivel < MAX_NIVELES) {
+          if (actual.nivel < MAX_NIVELES && !excluir.has(archivo.id)) {
             pendientes.push({ id: archivo.id, ruta: `${actual.ruta}${archivo.name}/`, nivel: actual.nivel + 1 });
           }
           continue;
@@ -162,7 +163,7 @@ function crearServicioDrive({ credenciales, folderId, fetchImpl, ahora = () => D
     return Buffer.from(await respuesta.arrayBuffer());
   }
 
-  return { listarCarpeta, descargar, exportar };
+  return { raiz: folderId, listarHijosResueltos, listarCarpeta, descargar, exportar };
 }
 
-module.exports = { crearServicioDrive, ALCANCE };
+module.exports = { crearServicioDrive, ALCANCE, TIPO_CARPETA };

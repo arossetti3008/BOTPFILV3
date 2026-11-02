@@ -25,7 +25,7 @@ Primero Render (para obtener la URL del backend), después Vercel (que necesita 
 |---|---|
 | `LLM_API_KEY` | La clave de Gemini (AI Studio). |
 | `FRONTEND_URL` | Por ahora poné `https://example.com`. Se corrige en el paso 3. |
-| `DRIVE_FOLDER_ID` | El id de la carpeta de bibliografía del docente: la parte final de su enlace, después de `/folders/`. |
+| `DRIVE_FOLDER_ID` | El id de la carpeta principal del docente (contiene "Bibliografía" y las carpetas "Corpus"): la parte final de su enlace, después de `/folders/`. |
 | `GOOGLE_SERVICE_ACCOUNT_JSON_BASE64` | El contenido del archivo `.json` de la cuenta de servicio: abrilo con el Bloc de notas, copiá **todo** y pegalo tal cual (también acepta el texto en base64). Ver `docs/CUENTA_DE_SERVICIO.md`. Si todavía no está, dejalo vacío: la app funciona sin bibliografía. |
 
 4. **Apply**. El primer despliegue tarda unos minutos. Al terminar, copiá la URL del servicio (por ejemplo `https://botpfilv3-backend.onrender.com`).
@@ -50,6 +50,6 @@ En Render → servicio → **Environment** → cambiá `FRONTEND_URL` por la URL
 - **"No se pudo conectar con el servidor" en la app:** `FRONTEND_URL` en Render no coincide exactamente con la URL de Vercel (CORS). Revisá que no tenga una barra final ni `http` en lugar de `https`.
 - **Cambié `VITE_API_URL` y no toma efecto:** Vite fija esa variable al construir la app. Después de cambiarla, hay que hacer **Redeploy** en Vercel.
 - **El primer pedido tarda hasta un minuto:** Render gratuito duerme el servicio tras 15 minutos sin uso. La app muestra "El servidor está despertando". **El día del taller, abrí la app 5 minutos antes** para despertarlo.
-- **Cambié un texto en `backend/contenidos/` (aviso, corpus, dimensiones):** hay que subir el cambio a GitHub (`main`). Render se actualiza solo en uno o dos minutos.
-- **Cambié la bibliografía en Drive:** no hace falta redesplegar. Se actualiza sola cada 30 minutos, o al instante forzando la sincronización (ver `docs/GUIA_DOCENTE.md`).
+- **Cambié un texto en `backend/contenidos/` (aviso, dimensiones, consigna):** hay que subir el cambio a GitHub (`main`). Render se actualiza solo en uno o dos minutos.
+- **Cambié la bibliografía o un corpus en Drive:** no hace falta redesplegar. Se actualiza sola cada 30 minutos, o al instante forzando la sincronización (ver `docs/GUIA_DOCENTE.md`).
 - **La cuota diaria de Gemini se reinicia a las 05:00 de Argentina.** Si se agota la del modelo principal, la app pasa sola al modelo de respaldo.

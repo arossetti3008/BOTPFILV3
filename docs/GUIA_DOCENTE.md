@@ -11,20 +11,22 @@ Todo lo que hace falta para preparar y usar la aplicación en los talleres. No h
 
 | Material | Dónde va | Estado al 01/11/2026 |
 |---|---|---|
-| PDFs de la bibliografía, con texto seleccionable (pueden ir en subcarpetas) | Carpeta de Drive del docente | ⏳ El docente está reorganizando la carpeta. Giglietti tiene páginas ilegibles: conviene pasarlo por OCR. |
-| Carpeta compartida con la cuenta de servicio | Drive | ⏳ Falta ([instructivo para el docente](INSTRUCTIVO_DOCENTE_BIBLIOGRAFIA.md)). |
+| Carpeta principal con "Bibliografía" y una carpeta "Corpus …" por corpus | Drive del docente | ⏳ El docente la está armando ([instructivo](INSTRUCTIVO_DOCENTE_BIBLIOGRAFIA.md)). |
+| PDFs de la bibliografía, con texto seleccionable (pueden ir en subcarpetas) | Carpeta "Bibliografía" | ⏳ Giglietti tiene páginas ilegibles: conviene pasarlo por OCR. |
+| Cada corpus: 3 fotos y el documento "Ficha" | Carpetas "Corpus …" | ⏳ La ficha del corpus 1 ya está escrita: [ficha-corpus-1.txt](ficha-corpus-1.txt). |
+| Carpeta principal compartida con la cuenta de servicio | Drive | ⏳ Falta. |
 | Datos de cada PDF (autor, año, título, referencia APA, página inicial) | `backend/contenidos/fuentes.csv` (los carga quien administra la app) | ⏳ Faltan los datos de Anguio y las referencias APA de Ciafardo, Giglietti y Oliveras. |
 | Cuenta de servicio | Google Cloud (la crea quien administra la app) | ⏳ Falta ([guía](CUENTA_DE_SERVICIO.md)). |
-| Corpus: problemática, eje y 3 imágenes con su ficha | `backend/contenidos/corpus/` | ✅ Corpus 1, "Representaciones de la feminidad". |
+| Corpus de respaldo (se usa si Drive falla) | `backend/contenidos/corpus/` | ✅ Corpus 1, "Representaciones de la feminidad". |
 | Texto final del aviso de IA y privacidad | `backend/contenidos/taller.json` | ⏳ Borrador: el docente lo confirma (sección 4). |
 | Instrucciones de entrega de evidencias | `backend/contenidos/entrega-evidencias.md` | ⏳ Dice "EJEMPLO": hay que completarlo (sección 4). |
 | Clave de Gemini (plan gratuito) | Render, variable `LLM_API_KEY` | ✅ Cargada. |
 
 ---
 
-## 2. Bibliografía (Google Drive)
+## 2. Carpeta de materiales y bibliografía (Google Drive)
 
-- **El docente:** arma la carpeta (puede usar subcarpetas) y la comparte con la cuenta de servicio → **[INSTRUCTIVO_DOCENTE_BIBLIOGRAFIA.md](INSTRUCTIVO_DOCENTE_BIBLIOGRAFIA.md)**.
+- **El docente:** arma la carpeta principal (con "Bibliografía" y las carpetas "Corpus") y la comparte con la cuenta de servicio → **[INSTRUCTIVO_DOCENTE_BIBLIOGRAFIA.md](INSTRUCTIVO_DOCENTE_BIBLIOGRAFIA.md)**.
 - **Quien administra la app:** crea la cuenta de servicio, la carga en Render y mantiene los datos de cada PDF en `backend/contenidos/fuentes.csv` → **[CUENTA_DE_SERVICIO.md](CUENTA_DE_SERVICIO.md)**.
 
 **Actualizar la bibliografía más adelante:** el docente sube el PDF a la carpeta y le pasa sus datos a quien administra la app, que agrega la fila en `fuentes.csv`. La carpeta se revisa sola cada 30 minutos. Si un PDF se reemplaza por otro con el mismo nombre, no hace falta tocar nada.
@@ -44,56 +46,28 @@ La respuesta es un reporte: cuántas fuentes, páginas y fragmentos indexó, y l
 
 ## 3. Cargar o cambiar un corpus
 
-Cada corpus tiene **exactamente 3 imágenes**. Se guarda en dos lugares de `backend/contenidos/corpus/`:
+Los corpus se manejan **desde Drive**: cada carpeta "Corpus …" de la carpeta principal es un corpus, con **exactamente 3 fotos** y un documento de Google llamado **"Ficha"**. El formato de la ficha y el peso recomendado de las fotos están en el [instructivo](INSTRUCTIVO_DOCENTE_BIBLIOGRAFIA.md#cada-carpeta-corpus).
 
-- **`imagenes/`**: los archivos JPG, PNG o WEBP.
-  - **Peso recomendado: menos de 500 KB y como máximo 1600 px de lado**, porque se ven desde celulares y viajan a Gemini.
-  - La app avisa en `/api/health` si alguna pesa de más.
-- **`corpus.json`**: los datos de cada corpus.
+- **Agregar un corpus:** crear otra carpeta "Corpus …" con sus 3 fotos y su ficha.
+- **Corregir una ficha o cambiar una foto:** hacerlo en Drive.
+- La app lo toma sola en hasta 30 minutos, o al instante forzando la sincronización (sección 2).
+- **No cambiar el nombre de una carpeta durante el taller:** el nombre identifica al corpus, y los grupos que estaban trabajando con él no podrían seguir.
 
-Ejemplo de un corpus dentro de `corpus.json`:
+Si una carpeta tiene un error (por ejemplo, 2 fotos en lugar de 3, o a la ficha le falta la problemática), ese corpus no se ofrece. Si antes funcionaba, se sigue mostrando su última versión correcta. En los dos casos, `/api/health` → `corpus.advertencias` dice cuál es el problema.
 
-```json
-{
-  "id": "corpus-2-ejemplo",
-  "titulo": "Corpus 2 — Título que ven los grupos",
-  "problematica": "La problemática sociocultural del corpus.",
-  "ejeComparabilidad": "Qué comparten las tres piezas y qué permite compararlas.",
-  "imagenes": [
-    {
-      "id": "img1",
-      "archivo": "01_nombre_del_archivo.jpg",
-      "titulo": "Título de la obra",
-      "autor": "Autor o autora",
-      "anio": "1990",
-      "soporte": "Afiche, fotografía, pintura…",
-      "procedencia": "Museo o archivo, ciudad",
-      "fuente": "https://dirección-de-la-ficha-de-la-obra",
-      "textoAlternativo": "Descripción breve de la imagen para personas que usan lectores de pantalla."
-    }
-  ]
-}
-```
+Qué recibe el asistente: la problemática, el eje y la ficha de cada obra (título, autor, año, soporte, procedencia). **El texto alternativo no lo recibe**, así no "ve" la imagen sin que el grupo la describa. Las fotos las recibe solo cuando el grupo las pide, después de escribir su propia interpretación.
 
-(En el archivo real van las 3 imágenes. Si hay más de un corpus, van uno después del otro, separados por coma, dentro de los corchetes `[ ]`.)
-
-Cómo se usan algunos campos:
-
-- **`id`**: sin espacios ni tildes. También va en la columna `corpus` de `fuentes.csv`, para que esa bibliografía tenga prioridad.
-- **`textoAlternativo`**: **el asistente no lo recibe**. Así no "ve" la imagen sin que el grupo la describa.
-- **Ficha** (título, autor, año, soporte, procedencia): el asistente sí la recibe.
-
-**Cómo publicar el cambio:** los archivos de `backend/contenidos/` están en GitHub. Hay dos formas:
-- Pedírselo a quien administra la app.
-- Editarlos desde la web de GitHub (abrir el archivo → ícono del lápiz → **Commit changes**, en la rama `main`). Para subir imágenes: carpeta `imagenes` → **Add file → Upload files**.
-
-Render se actualiza solo en uno o dos minutos. Si el corpus tiene un error (por ejemplo, 2 imágenes en lugar de 3, o un archivo que no existe), no se ofrece a los grupos y `/api/health` dice cuál es el problema.
+**Corpus de respaldo.** En `backend/contenidos/corpus/` (en GitHub) queda guardado el corpus 1. La app lo usa solo si Drive no está configurado, no responde o no tiene ningún corpus válido.
 
 ---
 
 ## 4. Textos que el docente puede editar
 
-Todos están en `backend/contenidos/` y se publican igual que el corpus (sección 3).
+Todos están en `backend/contenidos/`, en GitHub. Para cambiarlos hay dos formas:
+- Pedírselo a quien administra la app.
+- Editarlos desde la web de GitHub: abrir el archivo → ícono del lápiz → **Commit changes**, en la rama `main`.
+
+Render se actualiza solo en uno o dos minutos.
 
 | Archivo | Qué contiene |
 |---|---|
@@ -116,7 +90,8 @@ Las **instrucciones del asistente** (el "prompt") están en `backend/src/prompts
 - [ ] Abrir `/api/health` y revisar:
   - `"estado": "ok"`;
   - `"corpusDisponibles": 1` o más;
-  - `bibliografia.estado` en `"ok"`, con la cantidad de fuentes esperada.
+  - `bibliografia.estado` en `"ok"`, con la cantidad de fuentes esperada;
+  - `corpus.origen` en `"drive"` y `corpus.advertencias` vacío.
 - [ ] Probar la app de punta a punta desde un celular: entrar con un código de prueba (por ejemplo **M99**), mandar dos mensajes, exportar y borrar.
 - [ ] Repartir o anotar los códigos de grupo.
 - [ ] Confirmar cómo entregan los archivos (sección 4, `entrega-evidencias.md`).

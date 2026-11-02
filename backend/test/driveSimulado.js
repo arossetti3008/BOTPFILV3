@@ -125,8 +125,8 @@ function crearDriveSimulado(archivos = archivosDePrueba()) {
 
     if (partes[2]) {
       const tipoPedido = direccion.searchParams.get('mimeType');
-      const esperado = archivo.mimeType === TIPOS.hoja ? 'text/csv' : 'application/pdf';
-      if (tipoPedido !== esperado) return new Response('{}', { status: 400 });
+      const aceptados = archivo.mimeType === TIPOS.hoja ? ['text/csv'] : ['application/pdf', 'text/plain'];
+      if (!aceptados.includes(tipoPedido)) return new Response('{}', { status: 400 });
     } else if (direccion.searchParams.get('alt') !== 'media') {
       return new Response('{}', { status: 400 });
     }

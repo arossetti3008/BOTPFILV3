@@ -230,8 +230,10 @@ test('POST /api/admin/sincronizar: 401 sin token o con token incorrecto; 200 con
 
   const correcto = await request(app).post('/api/admin/sincronizar').set('x-admin-token', 'token-admin-de-prueba');
   assert.equal(correcto.status, 200);
-  assert.equal(correcto.body.fuentes, 2);
-  assert.equal(correcto.body.paginasSinTexto, 1);
+  assert.equal(correcto.body.bibliografia.fuentes, 2);
+  assert.equal(correcto.body.bibliografia.paginasSinTexto, 1);
+  // Sin carpetas "Corpus…" en Drive, se siguen usando los corpus del proyecto
+  assert.equal(correcto.body.corpus.origen, 'proyecto');
 });
 
 test('sin ADMIN_TOKEN configurado, la sincronización forzada siempre da 401', async () => {
