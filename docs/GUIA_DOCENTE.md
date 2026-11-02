@@ -50,7 +50,7 @@ Los corpus se manejan **desde Drive**: cada carpeta "Corpus …" de la carpeta p
 
 - **Agregar un corpus:** crear otra carpeta "Corpus …" con sus 3 fotos y su ficha.
 - **Corregir una ficha o cambiar una foto:** hacerlo en Drive.
-- La app lo toma sola en hasta 30 minutos, o al instante forzando la sincronización (sección 2).
+- La app lo toma sola en unos 2 minutos (la lista de corpus de la pantalla de inicio también se actualiza sola), o al instante forzando la sincronización (sección 2).
 - **No cambiar el nombre de una carpeta durante el taller:** el nombre identifica al corpus, y los grupos que estaban trabajando con él no podrían seguir.
 
 Si una carpeta tiene un error (por ejemplo, 2 fotos en lugar de 3, o a la ficha le falta la problemática), ese corpus no se ofrece. Si antes funcionaba, se sigue mostrando su última versión correcta. En los dos casos, `/api/health` → `corpus.advertencias` dice cuál es el problema.

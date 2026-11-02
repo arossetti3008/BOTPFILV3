@@ -12,7 +12,7 @@ const app = crearApp({ config });
 // Bibliografía y corpus se sincronizan con Drive en segundo plano: el
 // servidor no espera a Drive (mientras tanto, usa los corpus del proyecto)
 app.locals.bibliografia.iniciar(config.drive.resyncMinutos);
-app.locals.corpus.iniciar(config.drive.resyncMinutos);
+app.locals.corpus.iniciar(config.drive.corpusResyncMinutos);
 
 app.listen(config.puerto, () => {
   console.log(

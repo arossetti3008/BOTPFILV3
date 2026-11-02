@@ -11,6 +11,8 @@ function fechaLegible(iso) {
   return new Date(iso).toLocaleString('es-AR', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
+const SEGUNDOS_ENTRE_ACTUALIZACIONES = 60;
+
 export default function Inicio() {
   const { config, estadoConfig, cargarConfig, sesion, iniciarSesion } = useSesion();
   const navigate = useNavigate();
@@ -42,15 +44,30 @@ export default function Inicio() {
     }
   }
 
+  // La lista de corpus se vuelve a pedir cada minuto y al volver a la
+  // pestaña: si el docente agrega una carpeta en Drive, aparece sola
   useEffect(() => {
-    if (!config) return;
-    api
-      .listarCorpus()
-      .then((lista) => {
-        setCorpusLista(lista);
-        if (lista.length === 1) setCorpusId((actual) => actual || lista[0].id);
-      })
-      .catch((e) => setErrorCorpus(e.message));
+    if (!config) return undefined;
+    function pedirLista() {
+      api
+        .listarCorpus()
+        .then((lista) => {
+          setCorpusLista(lista);
+          setErrorCorpus('');
+          if (lista.length === 1) setCorpusId((actual) => actual || lista[0].id);
+        })
+        .catch((e) => setErrorCorpus(e.message));
+    }
+    function alVolver() {
+      if (document.visibilityState === 'visible') pedirLista();
+    }
+    pedirLista();
+    const reloj = setInterval(pedirLista, SEGUNDOS_ENTRE_ACTUALIZACIONES * 1000);
+    document.addEventListener('visibilitychange', alVolver);
+    return () => {
+      clearInterval(reloj);
+      document.removeEventListener('visibilitychange', alVolver);
+    };
   }, [config]);
 
   if (!config) return <EstadoServidor estado={estadoConfig} onReintentar={cargarConfig} />;

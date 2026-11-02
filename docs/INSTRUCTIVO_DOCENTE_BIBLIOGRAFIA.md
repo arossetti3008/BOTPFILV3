@@ -17,7 +17,7 @@ Quien administra la aplicación creó un **"usuario robot" de Google** (se llama
 
 Los estudiantes nunca entran a tu Drive: la aplicación les muestra las fotos y las fichas, y le pasa al asistente solo los fragmentos de bibliografía necesarios para cada pregunta.
 
-**Una ventaja:** para cambiar una foto, corregir una ficha o agregar un corpus nuevo, lo hacés directamente en Drive. La aplicación lo toma sola en hasta 30 minutos.
+**Una ventaja:** para cambiar una foto, corregir una ficha o agregar un corpus nuevo, lo hacés directamente en Drive. La aplicación lo toma sola en unos 2 minutos.
 
 ## Lo que vas a hacer
 
@@ -152,7 +152,7 @@ Hoy faltan estos datos:
 | Cambiar una foto o corregir una ficha | Hacelo en Drive. No hace falta avisar. |
 | Agregar un corpus | Creá otra carpeta "Corpus …" con sus 3 fotos y su ficha. No hace falta avisar. |
 
-La aplicación revisa la carpeta sola cada 30 minutos. Si algo de una carpeta "Corpus" está mal, ese corpus no se muestra (o se sigue mostrando su versión anterior) y quien administra la aplicación ve el motivo.
+La aplicación revisa las carpetas "Corpus" cada 2 minutos y la bibliografía cada 30 minutos. Si algo de una carpeta "Corpus" está mal, ese corpus no se muestra (o se sigue mostrando su versión anterior) y quien administra la aplicación ve el motivo.
 
 ## ¿Cómo sé si funcionó?
 

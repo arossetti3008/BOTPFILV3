@@ -57,6 +57,9 @@ function leerDrive(env, problemas) {
     credenciales,
     configurada,
     resyncMinutos: entero(env.DRIVE_RESYNC_MINUTOS, 30, 0),
+    // Los corpus se revisan más seguido: leer sus carpetas es rápido y así
+    // una carpeta nueva del docente aparece en un par de minutos
+    corpusResyncMinutos: entero(env.CORPUS_RESYNC_MINUTOS, 2, 0),
     adminToken,
   };
 }
