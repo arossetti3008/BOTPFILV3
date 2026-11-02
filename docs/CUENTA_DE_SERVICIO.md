@@ -38,10 +38,11 @@ Usá el **mismo proyecto de tu clave de Gemini**: AI Studio lo creó solo y en t
 
 1. Tocá el correo de la cuenta → pestaña **Claves** → **Agregar clave** → **Crear clave nueva** → **JSON** → **Crear**. Se descarga un archivo `.json`.
 2. Abrí ese archivo con el **Bloc de notas** (clic derecho → Abrir con → Bloc de notas), seleccioná todo (Ctrl+A) y copialo (Ctrl+C).
-3. En **Render** → `botpfilv3-backend` → **Environment**:
+3. En **Render** → `botpfilv3-backend` → **Environment** (sección **Environment Variables**, no "Secret Files"). Si alguna de estas variables no aparece en la lista, creala con **Edit** → **+ Add Environment Variable**, escribiendo el nombre exacto en **Key**: Render no guarda las variables que quedaron vacías al crear el servicio.
    - `GOOGLE_SERVICE_ACCOUNT_JSON_BASE64` → pegá el contenido completo del archivo, tal cual, empezando por `{` y terminando por `}`.
    - `DRIVE_FOLDER_ID` → el id de la carpeta del docente: la parte final del enlace, después de `/folders/`. En `https://drive.google.com/drive/folders/1AbC…xyz`, es `1AbC…xyz`.
-   - **Save**. Render se reinicia solo en uno o dos minutos.
+   - Si todavía no tenés el enlace del docente, dejá `DRIVE_FOLDER_ID` para después.
+   - **Save Changes**. Render se reinicia solo en uno o dos minutos.
 4. **Borrá el archivo `.json`** de tu carpeta Descargas: ya está guardado en Render. Si alguna vez hiciera falta, se crea otra clave en un minuto.
 
 > ⚠️ El archivo `.json` es una contraseña. No lo subas a GitHub ni a Drive, ni lo mandes por chat.
