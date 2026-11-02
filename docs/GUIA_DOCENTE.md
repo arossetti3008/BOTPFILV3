@@ -76,7 +76,7 @@ Render se actualiza solo en uno o dos minutos.
 | `dimensiones.json` | Las 5 dimensiones, con descripción y preguntas guía tomadas de la consigna. |
 | `consigna.md` | La consigna que se abre desde el inicio. |
 
-**Sobre el aviso:** tiene que conservar el punto que dice que lo escrito se envía a Google y que, en el plan gratuito, puede usarse para mejorar sus productos y ser leído por revisores. Lo exigen los términos de Gemini y es lo que justifica pedir que no escriban datos personales.
+**Sobre el aviso:** el 02/11/2026 se quitó del aviso el punto que decía que lo escrito se envía a Google y que, en el plan gratuito, puede usarse para mejorar sus productos y ser leído por revisores. Los términos de Gemini piden informarlo, así que **el docente lo dice en voz alta al empezar el taller** (sección 5). Es lo que justifica pedir que no escriban datos personales.
 
 **Códigos de grupo:** por defecto, M1 a M99 para la mañana y T1 a T99 para la tarde. Conviene repartirlos antes de empezar (M1, M2… en papel o en el pizarrón).
 
@@ -100,7 +100,7 @@ Las **instrucciones del asistente** (el "prompt") están en `backend/src/prompts
 - [ ] **Abrir la app** (https://botpfilv-3.vercel.app). El servidor gratuito se "duerme" después de 15 minutos sin uso. Al despertar tarda hasta un minuto en responder y **unos 4 minutos más en volver a leer la bibliografía** (los corpus están en segundos). Si se abre antes, los grupos no esperan y el asistente ya puede citar cuando lleguen a la fase 2.
 
 **Al empezar, decirle a los grupos**
-- Leer el aviso y no escribir nombres ni datos personales.
+- Leer el aviso y no escribir nombres ni datos personales: lo que escriben se envía a Google y, en el plan gratuito, puede usarse para mejorar sus productos y ser leído por revisores.
 - Usar **un solo dispositivo por grupo** y no usar ventanas privadas o de incógnito: la conversación se guarda en ese dispositivo.
 - El asistente no hace el análisis: primero piden su interpretación, después la revisan con la bibliografía y al final comparan.
 - **Exportar antes de irse** (botón "Terminar y exportar").
