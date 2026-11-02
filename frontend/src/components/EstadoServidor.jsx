@@ -17,16 +17,9 @@ export default function EstadoServidor({ estado, onReintentar }) {
   return (
     <div className="tarjeta estado-servidor">
       <AnimacionEspera />
-      <div role="status">
-        {estado.lento ? (
-          <p className="texto-suave">
-            El servidor está despertando (en el plan gratuito se duerme cuando no se usa). No cierren la página: entra
-            solo.
-          </p>
-        ) : (
-          <p className="texto-suave">Conectando con el servidor…</p>
-        )}
-      </div>
+      <p className="texto-suave" role="status">
+        Iniciando la aplicación…
+      </p>
     </div>
   );
 }

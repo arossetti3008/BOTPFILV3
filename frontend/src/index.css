@@ -391,22 +391,8 @@ a:focus-visible {
 /* Volumen: luz, sombra propia y sombra proyectada */
 .paso-4 .sintaxis-luz { opacity: 1; }
 .paso-4 .sintaxis-sombra { opacity: 0.18; }
-.sintaxis-pasos {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 4px 12px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  font-size: 0.9rem;
-  color: var(--texto-suave);
-}
-.sintaxis-pasos li { text-align: center; transition: color 0.3s ease; }
-.sintaxis-pasos li.hecho { color: var(--texto); }
-.sintaxis-pasos li.activo { color: var(--acento); font-weight: 700; }
 @media (prefers-reduced-motion: reduce) {
-  .sintaxis *, .sintaxis-pasos li { transition: none !important; animation: none !important; }
+  .sintaxis * { transition: none !important; animation: none !important; }
 }
 
 /* ---------- Análisis ---------- */

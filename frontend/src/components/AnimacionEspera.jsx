@@ -6,7 +6,8 @@
 // Con "reducir movimiento" activado, los pasos cambian sin transiciones.
 import { useEffect, useState } from 'react';
 
-const PASOS = ['Línea', 'Forma', 'Color', 'Textura', 'Volumen'];
+// Pasos: línea, forma, color, textura, volumen (solo visuales, sin texto)
+const PASOS = 5;
 const DURACION_MS = [1000, 900, 900, 900, 1500]; // el volumen queda un poco más
 const COLORES = ['var(--acento)', 'var(--azul)', 'var(--amarillo)'];
 
@@ -16,8 +17,8 @@ export default function AnimacionEspera() {
 
   useEffect(() => {
     const reloj = setTimeout(() => {
-      if (paso === PASOS.length - 1) setVuelta((v) => v + 1);
-      setPaso((p) => (p + 1) % PASOS.length);
+      if (paso === PASOS - 1) setVuelta((v) => v + 1);
+      setPaso((p) => (p + 1) % PASOS);
     }, DURACION_MS[paso]);
     return () => clearTimeout(reloj);
   }, [paso]);
@@ -47,14 +48,6 @@ export default function AnimacionEspera() {
         <circle className="sintaxis-luz" cx="60" cy="58" r="40" fill="url(#espera-luz)" />
         <circle className="sintaxis-linea" cx="60" cy="58" r="40" pathLength="100" />
       </svg>
-
-      <ol className="sintaxis-pasos" aria-hidden="true">
-        {PASOS.map((nombre, i) => (
-          <li key={nombre} className={i === paso ? 'activo' : i < paso ? 'hecho' : ''}>
-            {nombre}
-          </li>
-        ))}
-      </ol>
     </div>
   );
 }
