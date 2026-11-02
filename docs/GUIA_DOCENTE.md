@@ -96,8 +96,8 @@ Las **instrucciones del asistente** (el "prompt") están en `backend/src/prompts
 - [ ] Repartir o anotar los códigos de grupo.
 - [ ] Confirmar cómo entregan los archivos (sección 4, `entrega-evidencias.md`).
 
-**5 minutos antes de empezar**
-- [ ] **Abrir la app** (https://botpfilv-3.vercel.app). El servidor gratuito se "duerme" después de 15 minutos sin uso y tarda hasta un minuto en despertar. Si se abre antes, los grupos no esperan.
+**10 minutos antes de empezar**
+- [ ] **Abrir la app** (https://botpfilv-3.vercel.app). El servidor gratuito se "duerme" después de 15 minutos sin uso. Al despertar tarda hasta un minuto en responder y **unos 4 minutos más en volver a leer la bibliografía** (los corpus están en segundos). Si se abre antes, los grupos no esperan y el asistente ya puede citar cuando lleguen a la fase 2.
 
 **Al empezar, decirle a los grupos**
 - Leer el aviso y no escribir nombres ni datos personales.

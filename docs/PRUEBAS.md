@@ -205,7 +205,11 @@ Tests nuevos (`backend/test/corpus-drive.test.js`, Drive simulado; 78 tests en t
 
 La ficha del corpus 1, escrita en el formato nuevo, está en `docs/ficha-corpus-1.txt` y se verificó que se lee completa (3 imágenes con 7 datos cada una).
 
-**Pendiente:** probar con la carpeta real del docente (falta el enlace y que la comparta con la cuenta de servicio).
+**Prueba con la carpeta real del docente (Render, 02/11/2026):**
+- Corpus: "Corpus 1 — Representaciones de la feminidad" se lee desde Drive (id `corpus-1-representaciones-de-la-feminidad`). "Corpus 2" todavía no tiene ficha, así que no se ofrece. La foto de Guerrilla Girls pesa más de 500 KB (aviso).
+- **Problema encontrado y corregido:** al leer el PDF de Oliveras (13 MB, OCR), el servidor superaba los 512 MB de Render y se reiniciaba en bucle (error 502). Ahora el PDF se lee página por página: el pico local bajó de ~450 MB a ~190 MB, con el mismo texto extraído, y `npm start` usa `--max-old-space-size=320`.
+- Bibliografía: 6 fuentes (los datos salen de la hoja "fuentes" que el docente puso en Drive, que incluye a Anguio), 133 páginas, 204 fragmentos, 2 páginas sin texto (Giglietti p. 16 y Oliveras p. 37). En el servidor gratuito la lectura completa tarda **3 min 19 s**.
+- Conversación real en fase 2 sobre enunciador y enunciatario: la respuesta cita a la Cátedra (2026) y a Giglietti (2020, p. 277), aplica el concepto a la foto de Sherman sin resolver el análisis y cierra con preguntas.
 
 ## Fuentes oficiales consultadas (01/11/2026)
 

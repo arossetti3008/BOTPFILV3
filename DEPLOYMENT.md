@@ -49,7 +49,7 @@ En Render → servicio → **Environment** → cambiá `FRONTEND_URL` por la URL
 
 - **"No se pudo conectar con el servidor" en la app:** `FRONTEND_URL` en Render no coincide exactamente con la URL de Vercel (CORS). Revisá que no tenga una barra final ni `http` en lugar de `https`.
 - **Cambié `VITE_API_URL` y no toma efecto:** Vite fija esa variable al construir la app. Después de cambiarla, hay que hacer **Redeploy** en Vercel.
-- **El primer pedido tarda hasta un minuto:** Render gratuito duerme el servicio tras 15 minutos sin uso. La app muestra "El servidor está despertando". **El día del taller, abrí la app 5 minutos antes** para despertarlo.
+- **El primer pedido tarda hasta un minuto:** Render gratuito duerme el servicio tras 15 minutos sin uso. La app muestra "El servidor está despertando". Después tarda unos 4 minutos en volver a leer la bibliografía de Drive. **El día del taller, abrí la app 10 minutos antes.**
 - **Cambié un texto en `backend/contenidos/` (aviso, dimensiones, consigna):** hay que subir el cambio a GitHub (`main`). Render se actualiza solo en uno o dos minutos.
 - **Cambié la bibliografía o un corpus en Drive:** no hace falta redesplegar. Se actualiza sola cada 30 minutos, o al instante forzando la sincronización (ver `docs/GUIA_DOCENTE.md`).
 - **La cuota diaria de Gemini se reinicia a las 05:00 de Argentina.** Si se agota la del modelo principal, la app pasa sola al modelo de respaldo.
